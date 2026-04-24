@@ -146,13 +146,39 @@ function showInrDialog(platform) { location.href = `/${platform}/inr/`; }
 
 function landing() {
   const routes = ['home', 'records', 'inr', 'me', 'login', 'inr-settings', 'dose-settings', 'notifications', 'account', 'profile', 'help'];
-  const docLinks = [
-    ['完整技术方案', '/docs/tech/technical-proposal/'],
-    ['技术方案 .md 美化页', '/docs/tech/technical-proposal.md#preview'],
-    ['UI 设计说明', '/docs/ui/README/'],
-    ['README 完整版', '/README/']
+  const docGroups = [
+    {
+      title: '需求与功能清单',
+      desc: '按端、模块、功能节点说明实现方式、方案和采用理由。',
+      links: [
+        ['端模块功能清单', '/docs/product/module-feature-inventory/'],
+        ['当前进度与交付状态', '/docs/product/current-progress/'],
+        ['基础数据与结构审核', '/docs/tech/base-data-and-schema-review/']
+      ]
+    },
+    {
+      title: 'UI 与原型',
+      desc: '三端页面、首页状态卡片、强提醒、INR 趋势和设置交互说明。',
+      links: [
+        ['UI 设计说明', '/docs/ui/README/'],
+        ['微信首页原型', '/wechat/home/'],
+        ['Android INR 原型', '/android/inr/'],
+        ['iOS 设置原型', '/ios/me/']
+      ]
+    },
+    {
+      title: '技术方案与架构',
+      desc: '服务端、小程序、Flutter、API 契约、部署拓扑与后续扩展路线。',
+      links: [
+        ['完整技术方案', '/docs/tech/technical-proposal/'],
+        ['架构梳理报告', '/docs/tech/architecture-report/'],
+        ['数据库与缓存设计', '/docs/tech/database-and-cache-design/'],
+        ['多端 MVP 计划', '/docs/plans/2026-04-24-multiplatform-mvp/']
+      ]
+    }
   ];
-  return `<main class="landing"><section class="hero"><div><p class="eyebrow">Warfarin INR Tracker</p><h1>抗凝小助手</h1><p class="lead">记录每日服药、INR 检测、提醒设置和长期趋势，帮助持续管理华法林抗凝治疗。</p></div><span class="chip">目标 INR 1.8–2.5</span></section><section class="doc-links"><div><h2>完整版本文档</h2><p>技术方案与 UI 说明均支持美观预览；需要原始 Markdown 时可在文档页点击查看。</p></div><div>${docLinks.map(([label, href]) => `<a href="${href}">${label}<span>›</span></a>`).join('')}</div></section><section class="platform-grid">${Object.entries(platforms).map(([k, p]) => `<article class="platform-card"><h2>${p.label}</h2><p>${k === 'wechat' ? '微信快捷登录，适合日常快速记录。' : '适合手机端长期记录和提醒。'}</p><div class="route-links">${routes.map(id => `<a href="/${k}/${id}/">${routeMap[id]}<span>›</span></a>`).join('')}</div></article>`).join('')}</section></main>`;
+  const highlights = ['首页：最近 INR、下次检测、超明显提醒', '服药：完成后选择明日剂量，不做补服', 'INR：校正值主显示，原始值弱展示，双曲线趋势', '设置：检测方式、校正偏移、按天/周/月周期'];
+  return `<main class="landing docPortal"><section class="hero"><div><p class="eyebrow">Warfarin INR Tracker · Documentation Portal</p><h1>抗凝小助手文档入口</h1><p class="lead">集中查看需求、UI、技术方案、架构、数据库缓存设计和当前进度；所有 Markdown 文档已支持 Cloudflare 在线美化预览。</p><div class="heroBullets">${highlights.map(item => `<span>${item}</span>`).join('')}</div></div><span class="chip">目标 INR 1.8–2.5</span></section><section class="docGroupGrid">${docGroups.map(group => `<article class="docGroup"><div><p class="eyebrow">Document</p><h2>${group.title}</h2><p>${group.desc}</p></div><div class="docGroupLinks">${group.links.map(([label, href]) => `<a href="${href}">${label}<span>›</span></a>`).join('')}</div></article>`).join('')}</section><section class="platform-grid">${Object.entries(platforms).map(([k, p]) => `<article class="platform-card"><h2>${p.label}</h2><p>${k === 'wechat' ? '微信快捷登录，适合日常快速记录。' : '适合手机端长期记录和提醒。'}</p><div class="route-links">${routes.map(id => `<a href="/${k}/${id}/">${routeMap[id]}<span>›</span></a>`).join('')}</div></article>`).join('')}</section></main>`;
 }
 function render() {
   const doRender = () => {

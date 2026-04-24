@@ -6,8 +6,12 @@
 
 ## 文档目录
 
+- 端模块功能清单：[`docs/product/module-feature-inventory.md`](docs/product/module-feature-inventory.md)
+- 当前进度与交付状态：[`docs/product/current-progress.md`](docs/product/current-progress.md)
 - UI 设计说明：[`docs/ui/README.md`](docs/ui/README.md)
 - 技术方案：[`docs/tech/technical-proposal.md`](docs/tech/technical-proposal.md)
+- 架构梳理报告：[`docs/tech/architecture-report.md`](docs/tech/architecture-report.md)
+- 数据库与缓存设计：[`docs/tech/database-and-cache-design.md`](docs/tech/database-and-cache-design.md)
 - 基础数据与数据结构审核清单：[`docs/tech/base-data-and-schema-review.md`](docs/tech/base-data-and-schema-review.md)
 
 当前约定：

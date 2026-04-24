@@ -34,9 +34,28 @@
     let listType = null;
     let blockquote = [];
     let code = [];
+    let tableRows = [];
     let inCode = false;
     let codeLang = '';
     let headingIndex = 0;
+
+    const splitTableRow = (row) => row.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+    const closeTable = () => {
+      if (!tableRows.length) return;
+      const rows = tableRows.slice();
+      tableRows = [];
+      if (rows.length < 2 || !/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(rows[1])) {
+        rows.forEach(row => html.push(`<p>${inlineMarkdown(row)}</p>`));
+        return;
+      }
+      const header = splitTableRow(rows[0]);
+      const body = rows.slice(2).map(splitTableRow);
+      html.push('<table>');
+      html.push(`<thead><tr>${header.map(cell => `<th>${inlineMarkdown(cell)}</th>`).join('')}</tr></thead>`);
+      html.push('<tbody>');
+      for (const row of body) html.push(`<tr>${header.map((_, idx) => `<td>${inlineMarkdown(row[idx] || '')}</td>`).join('')}</tr>`);
+      html.push('</tbody></table>');
+    };
 
     const closeParagraph = () => {
       if (!paragraph.length) return;
@@ -63,12 +82,19 @@
           html.push(`<pre><code${codeLang ? ` data-lang="${escapeHtml(codeLang)}"` : ''}>${escapeHtml(code.join('\n'))}</code></pre>`);
           code = []; inCode = false; codeLang = '';
         } else {
-          closeParagraph(); closeList(); closeBlockquote();
+          closeTable(); closeParagraph(); closeList(); closeBlockquote();
           inCode = true; codeLang = fence[1] || '';
         }
         continue;
       }
       if (inCode) { code.push(raw); continue; }
+      const isTableLine = /^\s*\|.+\|\s*$/.test(raw);
+      if (isTableLine) {
+        closeParagraph(); closeList(); closeBlockquote();
+        tableRows.push(raw);
+        continue;
+      }
+      closeTable();
       if (!trimmed) { closeParagraph(); closeList(); closeBlockquote(); continue; }
       const heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
       if (heading) {
@@ -95,7 +121,7 @@
       closeList(); closeBlockquote();
       paragraph.push(trimmed);
     }
-    closeParagraph(); closeList(); closeBlockquote();
+    closeTable(); closeParagraph(); closeList(); closeBlockquote();
     if (inCode) html.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
     return { html: html.join('\n'), headings };
   }
