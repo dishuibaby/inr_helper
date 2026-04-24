@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"warfarin-inr-demo/server/internal/model"
-	"warfarin-inr-demo/server/internal/repository/memory"
+	"warfarin-inr-demo/server/internal/repository"
 )
 
 type Service struct {
-	repo *memory.Repository
+	repo repository.Repository
 	now  func() time.Time
 }
 
-func New(repo *memory.Repository) *Service {
+func New(repo repository.Repository) *Service {
 	return &Service{repo: repo, now: time.Now}
 }
 

@@ -5,6 +5,7 @@
 ## 2026-04-24
 
 ### Added
+- 新增服务端 `DB_ENGINE` 数据库引擎策略文档与最小 repository 接口抽象，当前默认保持内存仓储，后续预留 SQLite/MySQL 一键切换。
 - 新增微信小程序 TypeScript MVP 骨架，包含首页强提醒、校正/原始 INR 展示、服药完成后明日剂量模式选择、INR 双曲线数据结构与设置页。
 - 新增 `miniapp` 本地 TypeScript 校验，支持 `cd miniapp && npm test` 验证。
 - 新增 Go/Gin 服务端 MVP 骨架，包含健康检查、首页汇总、服药记录、INR 记录和设置接口。

@@ -1,15 +1,30 @@
 package router
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
+	"warfarin-inr-demo/server/internal/config"
 	"warfarin-inr-demo/server/internal/handler"
+	"warfarin-inr-demo/server/internal/repository"
 	"warfarin-inr-demo/server/internal/repository/memory"
 	"warfarin-inr-demo/server/internal/service"
 )
 
 func New() *gin.Engine {
+	cfg, err := config.Load()
+	if err != nil {
+		panic(err)
+	}
+	return NewWithConfig(cfg)
+}
+
+func NewWithConfig(cfg config.Config) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
-	repo := memory.NewRepository()
+	repo, err := newRepository(cfg.Database)
+	if err != nil {
+		panic(err)
+	}
 	svc := service.New(repo)
 	h := handler.New(svc)
 
@@ -26,4 +41,15 @@ func New() *gin.Engine {
 	v1.PUT("/settings", h.UpdateSettings)
 
 	return r
+}
+
+func newRepository(cfg config.DatabaseConfig) (repository.Repository, error) {
+	switch cfg.Engine {
+	case config.DatabaseEngineMemory:
+		return memory.NewRepository(), nil
+	case config.DatabaseEngineSQLite, config.DatabaseEngineMySQL:
+		return nil, fmt.Errorf("DB_ENGINE=%s is planned but not implemented; use DB_ENGINE=memory for the MVP", cfg.Engine)
+	default:
+		return nil, fmt.Errorf("unsupported DB_ENGINE %q", cfg.Engine)
+	}
 }

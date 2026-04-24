@@ -4,7 +4,7 @@
 
 **Goal:** 基于当前静态原型，启动微信小程序、Android/iOS Flutter、Go/Gin 服务端三线并行的 MVP 正式工程开发。
 
-**Architecture:** Monorepo。服务端使用 Go + Gin 单体分层架构，先提供内存/SQLite 可测版本，再演进 MySQL/Redis；微信小程序使用 TypeScript 原生小程序结构；Android/iOS 使用 Flutter 共用一套代码。三端共享 OpenAPI/API contract、业务规则和变更记录。
+**Architecture:** Monorepo。服务端使用 Go + Gin 单体分层架构，先提供内存 MVP；开发环境后续可使用 SQLite 以避免安装 MySQL；生产/正式环境再演进 MySQL/Redis。服务端必须保留 `DB_ENGINE=memory|sqlite|mysql` 风格的一键数据库引擎切换入口，通过 repository 接口隔离业务层与具体存储。微信小程序使用 TypeScript 原生小程序结构；Android/iOS 使用 Flutter 共用一套代码。三端共享 OpenAPI/API contract、业务规则和变更记录。
 
 **Tech Stack:** Go 1.19+/Gin、TypeScript 微信小程序、Flutter/Riverpod/Dio、OpenAPI、Playwright/Go test、Codex CLI 第三方代理开发与审查。
 
@@ -99,6 +99,28 @@
 - 提交：`feat(miniapp): add TypeScript mini program MVP skeleton`。
 
 ---
+
+## Task 3.5: 服务端数据库引擎策略确认
+
+**Objective:** 在 Task 4 前确认数据库选择：开发阶段允许使用 SQLite，避免本地安装 MySQL；后端架构必须支持后续通过 `DB_ENGINE` 一键切换存储引擎。
+
+**Decision:**
+- 当前 MVP 继续默认 `DB_ENGINE=memory`，不破坏已有内存仓储和联调测试。
+- 预留 `DB_ENGINE=sqlite` 作为本地开发持久化路径，后续实现 SQLite adapter 和迁移脚本。
+- 预留 `DB_ENGINE=mysql` 作为生产/正式部署路径，后续实现 MySQL adapter、连接配置和迁移脚本。
+- service/handler 不直接依赖具体数据库实现，只依赖 repository 接口；新增数据库时只扩展 adapter 和 engine factory。
+- 本阶段不安装 MySQL，不引入 SQLite/MySQL driver，不改变 API 行为。
+
+**Files:**
+- Modify: `server/internal/config/*.go`
+- Modify: `server/internal/repository/*.go`
+- Create: `server/README.md`
+- Modify: `CHANGELOG.md`
+
+**Verification:**
+- `cd server && go test ./...`
+- `cd miniapp && npm test`
+- 提交：`chore(server): document database engine strategy`。
 
 ## Task 4: Flutter Android/iOS MVP 骨架
 
