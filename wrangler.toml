@@ -1,4 +1,5 @@
 name = "warfarin-inr-demo"
+account_id = "0362b0dbdf25d791063a51c513731cb3"
 compatibility_date = "2026-04-23"
 
 [assets]

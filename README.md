@@ -2,7 +2,17 @@
 
 一个纯静态个人记录演示页，使用 HTML、CSS 和原生 JavaScript 展示服药记录、INR 监测记录与简单趋势图。
 
-> 本项目仅为演示页面，不构成医疗建议。华法林剂量和 INR 管理请遵医嘱。
+> 本项目仅为演示页面和技术规划沉淀，不构成医疗建议。华法林剂量和 INR 管理请遵医嘱。
+
+## 文档目录
+
+- UI 设计说明：[`docs/ui/README.md`](docs/ui/README.md)
+- 技术方案：[`docs/tech/technical-proposal.md`](docs/tech/technical-proposal.md)
+
+当前约定：
+
+- `docs/ui/`：放 UI 原型、设计说明、交互规则。
+- `docs/tech/`：放服务端、小程序、Android/iOS、数据库、接口等技术方案。
 
 ## 本地预览
 
