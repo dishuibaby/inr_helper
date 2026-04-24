@@ -13,6 +13,35 @@
 
 - `docs/ui/`：放 UI 原型、设计说明、交互规则。
 - `docs/tech/`：放服务端、小程序、Android/iOS、数据库、接口等技术方案。
+- `docs/plans/`：放正式开发拆解计划。
+- `packages/api-contract/`：放 OpenAPI 契约，供服务端、微信小程序、Flutter 共用。
+- `server/`：Go/Gin 服务端。
+- `miniapp/`：微信小程序 TypeScript 工程。
+- `app_flutter/`：Android/iOS Flutter 工程。
+
+## 正式开发执行方式
+
+- 以当前原型方案为准，微信小程序、Android/iOS、服务端同步推进。
+- 开发过程中优先使用 Codex CLI 作为编码代理；Hermes 负责任务拆解、验收、跨端沟通、集成、提交和部署。
+- 每个阶段及时提交 Git，并在 `CHANGELOG.md` 记录变更。
+- 关键代码通过第三方代理/独立上下文审查，审查记录沉淀到 `docs/reviews/`。
+- 医疗相关逻辑只做记录、提醒、风险分层，不提供剂量调整建议。
+
+## 本地验证
+
+```bash
+npm run build
+npm run test:product
+npm run test:md-preview
+```
+
+服务端工程创建后：
+
+```bash
+cd server && go test ./...
+```
+
+当前环境提示：Go、Node、Codex 可用；Flutter SDK 暂未安装，Flutter 阶段会先生成源码骨架与文档，安装 SDK 后补跑 `flutter test`。
 
 ## 本地预览
 

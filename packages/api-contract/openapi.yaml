@@ -1,0 +1,195 @@
+openapi: 3.0.3
+info:
+  title: Warfarin INR Assistant API
+  version: 0.1.0
+  description: |
+    MVP API contract for medication logging, INR monitoring, settings and home summary.
+    This product records and reminds only; it does not provide medical dosage advice.
+servers:
+  - url: http://127.0.0.1:8080/api/v1
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /home/summary:
+    get:
+      summary: Home summary
+      responses:
+        '200':
+          description: Latest INR, next test time, reminder and medication state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvelopeHomeSummary'
+  /medication/records:
+    post:
+      summary: Create medication action record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMedicationRecordRequest'
+      responses:
+        '200':
+          description: Created record
+  /inr/records:
+    get:
+      summary: List INR records
+      responses:
+        '200':
+          description: INR records with raw and corrected values
+    post:
+      summary: Create INR record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateINRRecordRequest'
+      responses:
+        '200':
+          description: Created record
+  /settings:
+    get:
+      summary: Get user settings
+      responses:
+        '200':
+          description: User settings
+    put:
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettings'
+      responses:
+        '200':
+          description: Updated settings
+components:
+  schemas:
+    EnvelopeHomeSummary:
+      type: object
+      required: [code, message, data]
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: ok
+        data:
+          $ref: '#/components/schemas/HomeSummary'
+    HomeSummary:
+      type: object
+      required: [prominentReminder, latestInr, nextTestAt, todayMedication]
+      properties:
+        prominentReminder:
+          type: object
+          required: [level, title, body]
+          properties:
+            level:
+              type: string
+              enum: [normal, weak, strong]
+            title:
+              type: string
+            body:
+              type: string
+        latestInr:
+          $ref: '#/components/schemas/INRRecord'
+        nextTestAt:
+          type: string
+          format: date-time
+        todayMedication:
+          type: object
+          required: [status, plannedDoseTablets]
+          properties:
+            status:
+              type: string
+              enum: [pending, taken, paused, missed]
+            plannedDoseTablets:
+              type: number
+    CreateMedicationRecordRequest:
+      type: object
+      required: [actionType, actualDoseTablets, tomorrowDoseMode]
+      properties:
+        actionType:
+          type: string
+          enum: [taken, paused, missed]
+        actualDoseTablets:
+          type: number
+        clientTime:
+          type: string
+          format: date-time
+        tomorrowDoseMode:
+          type: string
+          enum: [planned, manual]
+        tomorrowDoseTablets:
+          type: number
+    CreateINRRecordRequest:
+      type: object
+      required: [rawValue, testMethod, testedAt]
+      properties:
+        rawValue:
+          type: number
+        offset:
+          type: number
+          description: Correction offset applied to raw value.
+        testMethod:
+          type: string
+          enum: [hospital_lab, poct_device, home_device, other]
+        testedAt:
+          type: string
+          format: date-time
+    INRRecord:
+      type: object
+      required: [id, rawValue, correctedValue, abnormalTier, testMethod, testedAt]
+      properties:
+        id:
+          type: string
+        rawValue:
+          type: number
+        correctedValue:
+          type: number
+        abnormalTier:
+          type: string
+          enum: [normal, weak_low, weak_high, strong_low, strong_high]
+        testMethod:
+          type: string
+        testedAt:
+          type: string
+          format: date-time
+    UserSettings:
+      type: object
+      required: [targetInrMin, targetInrMax, defaultMedicationTime, testCycle, testMethods, inrOffset]
+      properties:
+        targetInrMin:
+          type: number
+          example: 1.8
+        targetInrMax:
+          type: number
+          example: 2.5
+        defaultMedicationTime:
+          type: string
+          example: '08:00'
+        inrOffset:
+          type: number
+          example: 0.0
+        testMethods:
+          type: array
+          items:
+            type: string
+        testCycle:
+          type: object
+          required: [unit, interval]
+          properties:
+            unit:
+              type: string
+              enum: [day, week, month]
+            interval:
+              type: integer
+              minimum: 1
