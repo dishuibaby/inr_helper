@@ -146,7 +146,13 @@ function showInrDialog(platform) { location.href = `/${platform}/inr/`; }
 
 function landing() {
   const routes = ['home', 'records', 'inr', 'me', 'login', 'inr-settings', 'dose-settings', 'notifications', 'account', 'profile', 'help'];
-  return `<main class="landing"><section class="hero"><div><p class="eyebrow">Warfarin INR Tracker</p><h1>抗凝小助手</h1><p class="lead">记录每日服药、INR 检测、提醒设置和长期趋势，帮助持续管理华法林抗凝治疗。</p></div><span class="chip">目标 INR 1.8–2.5</span></section><section class="platform-grid">${Object.entries(platforms).map(([k, p]) => `<article class="platform-card"><h2>${p.label}</h2><p>${k === 'wechat' ? '微信快捷登录，适合日常快速记录。' : '适合手机端长期记录和提醒。'}</p><div class="route-links">${routes.map(id => `<a href="/${k}/${id}/">${routeMap[id]}<span>›</span></a>`).join('')}</div></article>`).join('')}</section></main>`;
+  const docLinks = [
+    ['完整技术方案', '/docs/tech/technical-proposal/'],
+    ['技术方案 .md 美化页', '/docs/tech/technical-proposal.md#preview'],
+    ['UI 设计说明', '/docs/ui/README/'],
+    ['README 完整版', '/README/']
+  ];
+  return `<main class="landing"><section class="hero"><div><p class="eyebrow">Warfarin INR Tracker</p><h1>抗凝小助手</h1><p class="lead">记录每日服药、INR 检测、提醒设置和长期趋势，帮助持续管理华法林抗凝治疗。</p></div><span class="chip">目标 INR 1.8–2.5</span></section><section class="doc-links"><div><h2>完整版本文档</h2><p>技术方案与 UI 说明均支持美观预览；需要原始 Markdown 时可在文档页点击查看。</p></div><div>${docLinks.map(([label, href]) => `<a href="${href}">${label}<span>›</span></a>`).join('')}</div></section><section class="platform-grid">${Object.entries(platforms).map(([k, p]) => `<article class="platform-card"><h2>${p.label}</h2><p>${k === 'wechat' ? '微信快捷登录，适合日常快速记录。' : '适合手机端长期记录和提醒。'}</p><div class="route-links">${routes.map(id => `<a href="/${k}/${id}/">${routeMap[id]}<span>›</span></a>`).join('')}</div></article>`).join('')}</section></main>`;
 }
 function render() {
   const doRender = () => {
