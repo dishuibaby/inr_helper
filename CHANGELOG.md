@@ -5,6 +5,7 @@
 ## 2026-04-24
 
 ### Added
+- 更新正式开发执行规则：采用多 worktree/多代理并行开发，按 Flutter、服务端 SQLite、API 契约/CI、小程序体验四个模块拆分，最终统一联调、审查并推送 GitHub。
 - 新增服务端 `DB_ENGINE` 数据库引擎策略文档与最小 repository 接口抽象，当前默认保持内存仓储，后续预留 SQLite/MySQL 一键切换。
 - 新增微信小程序 TypeScript MVP 骨架，包含首页强提醒、校正/原始 INR 展示、服药完成后明日剂量模式选择、INR 双曲线数据结构与设置页。
 - 新增 `miniapp` 本地 TypeScript 校验，支持 `cd miniapp && npm test` 验证。

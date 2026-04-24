@@ -12,14 +12,44 @@
 
 ## 执行规则
 
-1. 每个可独立验证的阶段必须及时提交 Git。
-2. 每次提交前更新 `CHANGELOG.md`。
-3. 开发任务优先交给 Codex CLI 执行；Hermes 做验收、补充沟通、集成与部署。
-4. 代码落地前后必须有自动化验证；当前环境缺少 Flutter SDK 时，Flutter 阶段先生成工程代码与文档，SDK 安装后补跑完整测试。
-5. 重要变更使用第三方代理/独立上下文审查：Codex 自审 + Hermes independent reviewer 双重检查。
-6. 医疗相关逻辑只做记录、提醒与风险分层，不输出剂量调整建议。
+1. 每个可独立验证的阶段必须及时提交 Git，并推送到 GitHub。
+2. 每次提交前更新 `CHANGELOG.md`，说明用户可见变化、架构变化与验证结果。
+3. 开发任务优先交给 Codex CLI/独立代理执行；Hermes 做验收、补充沟通、集成、GitHub 推送与最终交付。
+4. 多模块开发使用独立 git worktree/分支并行执行，避免多个代理同时修改同一工作区；集成阶段由 Hermes 统一合并。
+5. 架构原则：低耦合、高可用、高扩展；业务规则集中在服务/领域层，端侧只做展示与输入；存储、API 客户端、UI 状态管理均通过接口/adapter 隔离。
+6. 自动化质量门禁：每个模块至少运行本模块测试；集成前运行服务端 Go 测试、小程序 TypeScript 校验、产品/Markdown 验证；可用时运行 Flutter test/analyze。
+7. 重要变更使用第三方代理/独立上下文审查：Codex 自审 + Hermes independent reviewer 双重检查，审查记录沉淀到 `docs/reviews/`。
+8. 医疗相关逻辑只做记录、提醒与风险分层，不输出剂量调整建议。
+9. 当前环境缺少 Flutter SDK 时，Flutter 阶段先生成工程代码、静态结构和 README，SDK 安装后补跑完整测试。
 
 ---
+
+## 并行开发模块拆分
+
+### Module A: Flutter Android/iOS 客户端
+- Branch/worktree: `feat/flutter-mvp` / `/tmp/warfarin-inr-demo-flutter`
+- Scope: `app_flutter/`，包含 Clean Architecture 风格目录、API client、domain models、Riverpod 状态层、首页/服药/INR/设置页面骨架与 widget/unit tests。
+- Verification: `flutter test`/`flutter analyze`（SDK 可用时）；无 SDK 时执行源码结构检查并记录限制。
+
+### Module B: 服务端 SQLite 持久化与迁移入口
+- Branch/worktree: `feat/server-sqlite-adapter` / `/tmp/warfarin-inr-demo-server-sqlite`
+- Scope: `server/internal/repository/sqlite/`、迁移脚本、`DB_ENGINE=sqlite`、配置文档；保持 `memory` 默认不破坏现有测试。
+- Verification: `GOMODCACHE=/tmp/go/pkg/mod GOCACHE=/tmp/go-build go test ./...`，新增 SQLite repository 测试。
+
+### Module C: API 契约、共享类型与 CI
+- Branch/worktree: `feat/contracts-ci` / `/tmp/warfarin-inr-demo-contracts-ci`
+- Scope: OpenAPI 与服务端/小程序/Flutter 模型对齐，GitHub Actions 运行服务端、小程序、产品和文档验证。
+- Verification: 本地执行合同/类型检查；推送后观察 GitHub Actions。
+
+### Module D: 小程序体验补齐与联调准备
+- Branch/worktree: `feat/miniapp-integration-polish` / `/tmp/warfarin-inr-demo-miniapp`
+- Scope: 小程序端错误态、加载态、API base 配置、首页强提醒/INR 双曲线/设置/明日剂量交互补齐，保留低耦合 request 层。
+- Verification: `cd miniapp && npm test`。
+
+### Integration Module: 合并、联调、审查、GitHub 交付
+- Branch: `main` 或集成分支。
+- Scope: 合并上述模块，启动服务端做 API smoke，运行完整测试，生成 `docs/reviews/` 和 `docs/runbooks/local-dev.md`，推送到 GitHub。
+
 
 ## Task 1: Monorepo 基础治理与契约目录
 
