@@ -5,12 +5,19 @@
   box-sizing: border-box;
 }
 
+.state-card,
 .card {
   margin-bottom: 24rpx;
   padding: 32rpx;
   border-radius: 28rpx;
   background: #ffffff;
   box-shadow: 0 12rpx 40rpx rgba(15, 23, 42, 0.08);
+}
+
+.warning {
+  color: #92400e;
+  background: #fffbeb;
+  font-size: 28rpx;
 }
 
 .label {
@@ -33,11 +40,18 @@
   line-height: 1.5;
 }
 
-.value {
+.value,
+.picker-value,
+.input {
   margin-top: 12rpx;
   color: #0f172a;
   font-size: 32rpx;
   font-weight: 700;
+}
+
+.input {
+  min-height: 72rpx;
+  border-bottom: 2rpx solid #e2e8f0;
 }
 
 .primary-button {

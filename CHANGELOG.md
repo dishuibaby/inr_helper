@@ -5,6 +5,12 @@
 ## 2026-04-24
 
 ### Added
+- 新增 Flutter Android/iOS MVP 骨架，包含 API 抽象、领域模型、状态层，以及首页/服药/INR/设置页面。
+- 新增服务端 SQLite repository adapter、自动 schema 初始化和 `DATABASE_URL`/`SQLITE_PATH` 配置，`DB_ENGINE=memory` 继续作为默认值。
+- 新增 SQLite 仓储持久化测试，覆盖 INR 记录排序、设置保存和服药记录当日查询。
+- 对齐 OpenAPI 契约与 Go 服务端接口，覆盖首页汇总、服药记录明日剂量、INR 原始/校正/趋势/异常分层、设置检测方式/偏移量/检测周期。
+- 新增 GitHub Actions CI，验证服务端 Go 测试、小程序 TypeScript 测试，以及存在时的产品/Markdown 预览测试。
+- 打磨小程序集成体验：API 配置层、请求错误处理、加载/错误状态、首页强提醒、明日剂量选择、INR 双曲线视图模型和设置校验。
 - 更新正式开发执行规则：采用多 worktree/多代理并行开发，按 Flutter、服务端 SQLite、API 契约/CI、小程序体验四个模块拆分，最终统一联调、审查并推送 GitHub。
 - 新增服务端 `DB_ENGINE` 数据库引擎策略文档与最小 repository 接口抽象，当前默认保持内存仓储，后续预留 SQLite/MySQL 一键切换。
 - 新增微信小程序 TypeScript MVP 骨架，包含首页强提醒、校正/原始 INR 展示、服药完成后明日剂量模式选择、INR 双曲线数据结构与设置页。

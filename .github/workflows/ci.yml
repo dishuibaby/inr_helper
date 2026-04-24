@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate server, miniapp, and previews
+    runs-on: ubuntu-latest
+    env:
+      GOCACHE: ${{ runner.temp }}/go-build-cache
+      GOMODCACHE: ${{ runner.temp }}/go-mod-cache
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache: false
+
+      - name: Prepare Go caches
+        run: mkdir -p "$GOCACHE" "$GOMODCACHE"
+
+      - name: Test server
+        working-directory: server
+        run: go test ./...
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            miniapp/package-lock.json
+
+      - name: Install miniapp dependencies
+        working-directory: miniapp
+        run: npm ci
+
+      - name: Test miniapp
+        working-directory: miniapp
+        run: npm test
+
+      - name: Install root dependencies
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        if: ${{ hashFiles('product-refinement.spec.cjs', 'markdown-preview.spec.cjs') != '' }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Test product preview
+        if: ${{ hashFiles('product-refinement.spec.cjs') != '' }}
+        run: npm run test:product --if-present
+
+      - name: Test markdown preview
+        if: ${{ hashFiles('markdown-preview.spec.cjs') != '' }}
+        run: npm run test:md-preview --if-present

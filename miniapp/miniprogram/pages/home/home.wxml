@@ -1,4 +1,7 @@
 <view class="page home-page">
+  <view wx:if="{{loading}}" class="state-card">正在加载首页数据…</view>
+  <view wx:elif="{{errorText}}" class="state-card warning">{{errorText}}</view>
+
   <view class="hero-card">
     <view class="eyebrow">最近校正后 INR</view>
     <view class="corrected-inr">{{summary.latestCorrectedDisplay}}</view>
@@ -7,8 +10,9 @@
   </view>
 
   <view class="must-reminder">
-    <view class="reminder-label">必须提醒</view>
-    <view class="reminder-text">{{summary.mustHaveReminder}}</view>
+    <view class="reminder-label">{{summary.reminderTitle}}</view>
+    <view class="reminder-text">{{summary.prominentReminder.body}}</view>
+    <view class="reminder-subtitle">{{summary.reminderSubtitle}}</view>
   </view>
 
   <view class="info-card">
@@ -18,6 +22,6 @@
 
   <view class="info-card subtle">
     <view class="info-label">今日服药</view>
-    <view class="info-value">{{summary.medicationCompletedToday ? '已完成记录' : '待完成记录'}}</view>
+    <view class="info-value">{{summary.completionText}}</view>
   </view>
 </view>

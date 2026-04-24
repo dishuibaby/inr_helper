@@ -33,8 +33,8 @@
 
 ### Module B: 服务端 SQLite 持久化与迁移入口
 - Branch/worktree: `feat/server-sqlite-adapter` / `/tmp/warfarin-inr-demo-server-sqlite`
-- Scope: `server/internal/repository/sqlite/`、迁移脚本、`DB_ENGINE=sqlite`、配置文档；保持 `memory` 默认不破坏现有测试。
-- Verification: `GOMODCACHE=/tmp/go/pkg/mod GOCACHE=/tmp/go-build go test ./...`，新增 SQLite repository 测试。
+- Scope: `server/internal/repository/sqlite/`、迁移脚本、`DB_ENGINE=sqlite`、配置文档；保持 `memory` 默认不破坏现有测试。✅
+- Verification: `GOMODCACHE=/tmp/go/pkg/mod GOCACHE=/tmp/go-build go test ./...`，新增 SQLite repository 测试。✅
 
 ### Module C: API 契约、共享类型与 CI
 - Branch/worktree: `feat/contracts-ci` / `/tmp/warfarin-inr-demo-contracts-ci`
@@ -151,6 +151,31 @@
 - `cd server && go test ./...`
 - `cd miniapp && npm test`
 - 提交：`chore(server): document database engine strategy`。
+
+## Task 3.6: 服务端 SQLite 持久化与迁移入口
+
+**Objective:** 实现 Module B，让服务端在保持默认内存仓储的同时支持 `DB_ENGINE=sqlite` 本地持久化。
+
+**Status:** Completed on 2026-04-24.
+
+**Files:**
+- Create: `server/internal/repository/sqlite/repository.go`
+- Create: `server/internal/repository/sqlite/repository_test.go`
+- Create: `server/migrations/sqlite_schema.sql`
+- Modify: `server/internal/config/config.go`
+- Modify: `server/internal/router/router.go`
+- Modify: `server/README.md`
+- Modify: `server/go.mod`, `server/go.sum`
+
+**Acceptance:**
+- `DB_ENGINE=memory` remains default and existing API tests keep passing.
+- `DB_ENGINE=sqlite` opens `DATABASE_URL` first, then `SQLITE_PATH`, and applies schema automatically.
+- SQLite adapter satisfies `repository.Repository` and persists medications, INR records, and settings.
+- Abnormal INR logic remains in `service` and is unchanged.
+
+**Verification:**
+- `cd server && GOPATH=/tmp/go GOMODCACHE=/tmp/go/pkg/mod GOCACHE=/tmp/go-build go test ./...`
+- Commit: `feat(server): add SQLite repository adapter`.
 
 ## Task 4: Flutter Android/iOS MVP 骨架
 

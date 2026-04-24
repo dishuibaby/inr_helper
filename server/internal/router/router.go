@@ -8,6 +8,7 @@ import (
 	"warfarin-inr-demo/server/internal/handler"
 	"warfarin-inr-demo/server/internal/repository"
 	"warfarin-inr-demo/server/internal/repository/memory"
+	sqliterepo "warfarin-inr-demo/server/internal/repository/sqlite"
 	"warfarin-inr-demo/server/internal/service"
 )
 
@@ -47,8 +48,14 @@ func newRepository(cfg config.DatabaseConfig) (repository.Repository, error) {
 	switch cfg.Engine {
 	case config.DatabaseEngineMemory:
 		return memory.NewRepository(), nil
-	case config.DatabaseEngineSQLite, config.DatabaseEngineMySQL:
-		return nil, fmt.Errorf("DB_ENGINE=%s is planned but not implemented; use DB_ENGINE=memory for the MVP", cfg.Engine)
+	case config.DatabaseEngineSQLite:
+		dsn := cfg.URL
+		if dsn == "" {
+			dsn = cfg.SQLitePath
+		}
+		return sqliterepo.NewRepository(dsn)
+	case config.DatabaseEngineMySQL:
+		return nil, fmt.Errorf("DB_ENGINE=mysql is planned but not implemented; use DB_ENGINE=memory or DB_ENGINE=sqlite")
 	default:
 		return nil, fmt.Errorf("unsupported DB_ENGINE %q", cfg.Engine)
 	}

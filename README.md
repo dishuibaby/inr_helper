@@ -14,7 +14,7 @@
 - `docs/ui/`：放 UI 原型、设计说明、交互规则。
 - `docs/tech/`：放服务端、小程序、Android/iOS、数据库、接口等技术方案。
 - `docs/plans/`：放正式开发拆解计划。
-- `packages/api-contract/`：放 OpenAPI 契约，供服务端、微信小程序、Flutter 共用。
+- `packages/api-contract/`：放 OpenAPI 契约，供服务端、微信小程序、Flutter 共用；当前覆盖首页汇总、服药记录、INR raw/corrected/trend/tier 与设置项。
 - `server/`：Go/Gin 服务端。
 - `miniapp/`：微信小程序 TypeScript 工程。
 - `app_flutter/`：Android/iOS Flutter 工程。
@@ -33,13 +33,17 @@
 npm run build
 npm run test:product
 npm run test:md-preview
+cd miniapp && npm test
 ```
 
-服务端工程创建后：
+服务端测试建议使用临时可写 Go 缓存，和 CI 保持一致：
 
 ```bash
-cd server && go test ./...
+cd server
+GOCACHE=/tmp/warfarin-go-build-cache GOMODCACHE=/tmp/warfarin-go-mod-cache go test ./...
 ```
+
+GitHub Actions 会运行服务端 Go 测试、微信小程序 TypeScript 校验，以及存在时的产品/Markdown 预览测试。
 
 当前环境提示：Go、Node、Codex 可用；Flutter SDK 暂未安装，Flutter 阶段会先生成源码骨架与文档，安装 SDK 后补跑 `flutter test`。
 

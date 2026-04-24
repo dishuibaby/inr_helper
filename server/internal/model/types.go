@@ -30,7 +30,6 @@ type MedicationRecord struct {
 	ID                  string    `json:"id"`
 	ActionType          string    `json:"actionType"`
 	ActualDoseTablets   float64   `json:"actualDoseTablets"`
-	ClientTime          time.Time `json:"clientTime,omitempty"`
 	RecordedAt          time.Time `json:"recordedAt"`
 	TomorrowDoseMode    string    `json:"tomorrowDoseMode"`
 	TomorrowDoseTablets *float64  `json:"tomorrowDoseTablets,omitempty"`
@@ -39,7 +38,6 @@ type MedicationRecord struct {
 type CreateMedicationRecordRequest struct {
 	ActionType          string   `json:"actionType" binding:"required,oneof=taken paused missed"`
 	ActualDoseTablets   float64  `json:"actualDoseTablets"`
-	ClientTime          string   `json:"clientTime"`
 	TomorrowDoseMode    string   `json:"tomorrowDoseMode" binding:"required,oneof=planned manual"`
 	TomorrowDoseTablets *float64 `json:"tomorrowDoseTablets"`
 }
@@ -48,9 +46,27 @@ type INRRecord struct {
 	ID             string    `json:"id"`
 	RawValue       float64   `json:"rawValue"`
 	CorrectedValue float64   `json:"correctedValue"`
+	Trend          string    `json:"trend"`
 	AbnormalTier   string    `json:"abnormalTier"`
 	TestMethod     string    `json:"testMethod"`
 	TestedAt       time.Time `json:"testedAt"`
+}
+
+type INRTrendPoint struct {
+	Date           string  `json:"date"`
+	RawValue       float64 `json:"rawValue"`
+	CorrectedValue float64 `json:"correctedValue"`
+}
+
+type INRRecordsResponse struct {
+	Records     []INRRecord     `json:"records"`
+	Trend       []INRTrendPoint `json:"trend"`
+	TargetRange TargetRange     `json:"targetRange"`
+}
+
+type TargetRange struct {
+	Min float64 `json:"min"`
+	Max float64 `json:"max"`
 }
 
 type CreateINRRecordRequest struct {

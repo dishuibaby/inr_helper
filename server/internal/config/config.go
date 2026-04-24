@@ -18,10 +18,13 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
-	// Engine selects the repository backend. The MVP defaults to memory;
-	// sqlite/mysql are documented targets for one-click switching once their
-	// adapters and migrations are added.
+	// Engine selects the repository backend. The MVP defaults to memory.
 	Engine DatabaseEngine
+	// URL is the primary database connection value. For SQLite this may be a
+	// filesystem path or a file: DSN.
+	URL string
+	// SQLitePath is a SQLite-specific fallback when DATABASE_URL is not set.
+	SQLitePath string
 }
 
 func Load() (Config, error) {
@@ -32,7 +35,11 @@ func Load() (Config, error) {
 	if !engine.IsSupported() {
 		return Config{}, fmt.Errorf("unsupported DB_ENGINE %q", engine)
 	}
-	return Config{Database: DatabaseConfig{Engine: engine}}, nil
+	return Config{Database: DatabaseConfig{
+		Engine:     engine,
+		URL:        os.Getenv("DATABASE_URL"),
+		SQLitePath: os.Getenv("SQLITE_PATH"),
+	}}, nil
 }
 
 func (engine DatabaseEngine) IsSupported() bool {

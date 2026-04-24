@@ -6,7 +6,7 @@ Go/Gin API server for the warfarin INR MVP.
 
 ```bash
 cd server
-go test ./...
+GOMODCACHE=/tmp/go/pkg/mod GOCACHE=/tmp/go-build go test ./...
 go run ./cmd/api
 ```
 
@@ -14,18 +14,26 @@ The server listens on `:8080` by default and exposes `GET /healthz` plus the `/a
 
 ## Database Engine Strategy
 
-The MVP currently runs on an in-memory repository so frontend and API work can continue without installing MySQL. Keep repository callers behind `server/internal/repository.Repository` and select concrete adapters through `DB_ENGINE` so the backend can switch storage engines with one config value later.
+Repository callers stay behind `server/internal/repository.Repository`; concrete storage is selected through `DB_ENGINE` so handlers and services do not depend on a database package.
 
-Supported engine values by design:
+Supported engine values:
 
-- `memory` — current default; volatile process-local storage for tests and early local demos.
-- `sqlite` — planned local development engine to avoid requiring MySQL installation.
-- `mysql` — planned production/staging engine when migrations and deployment are ready.
+- `memory` — default; volatile process-local storage for tests and early local demos.
+- `sqlite` — local persistent storage through `database/sql` and the pure-Go `modernc.org/sqlite` driver, suitable for Linux ARM64 without CGO.
+- `mysql` — reserved production/staging target; adapter and migrations are not implemented yet.
 
-Current status:
+Run with the default memory repository:
 
 ```bash
 DB_ENGINE=memory go run ./cmd/api
 ```
 
-`DB_ENGINE=sqlite` and `DB_ENGINE=mysql` are reserved and intentionally fail until their adapters, migrations, and connection settings are implemented. Do not wire handlers or services directly to a concrete database package; add a repository adapter that satisfies `repository.Repository` and update the engine factory instead.
+Run with SQLite using either `DATABASE_URL` or `SQLITE_PATH`:
+
+```bash
+DB_ENGINE=sqlite SQLITE_PATH=./warfarin.db go run ./cmd/api
+# or
+DB_ENGINE=sqlite DATABASE_URL=file:./warfarin.db go run ./cmd/api
+```
+
+SQLite schema is applied automatically at repository startup and is also stored in `migrations/sqlite_schema.sql` for review/deployment tooling. The adapter persists medication records, INR records, and settings while preserving existing abnormal INR tier logic in the service layer.

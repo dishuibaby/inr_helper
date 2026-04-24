@@ -80,7 +80,7 @@ func TestINRRecordsGetAndPost(t *testing.T) {
 	decode(t, created.Body.Bytes(), &createdEnvelope)
 	var record map[string]interface{}
 	decode(t, createdEnvelope.Data, &record)
-	if record["correctedValue"].(float64) != 2.2 || record["abnormalTier"] != "normal" {
+	if record["correctedValue"].(float64) != 2.2 || record["abnormalTier"] != "normal" || record["trend"] != "in_range" {
 		t.Fatalf("unexpected INR record: %#v", record)
 	}
 
@@ -93,7 +93,7 @@ func TestINRRecordsGetAndPost(t *testing.T) {
 	decode(t, weak.Body.Bytes(), &weakEnvelope)
 	var weakRecord map[string]interface{}
 	decode(t, weakEnvelope.Data, &weakRecord)
-	if weakRecord["abnormalTier"] != "weak_high" {
+	if weakRecord["abnormalTier"] != "weak_high" || weakRecord["trend"] != "high" {
 		t.Fatalf("expected weak_high for +0.06 above max, got %#v", weakRecord)
 	}
 
@@ -116,10 +116,13 @@ func TestINRRecordsGetAndPost(t *testing.T) {
 	}
 	var listEnvelope envelope
 	decode(t, listed.Body.Bytes(), &listEnvelope)
-	var records []map[string]interface{}
-	decode(t, listEnvelope.Data, &records)
-	if len(records) != 3 || records[0]["id"] == "" {
-		t.Fatalf("expected three persisted INR records, got %#v", records)
+	var recordsResponse struct {
+		Records []map[string]interface{} `json:"records"`
+		Trend   []map[string]interface{} `json:"trend"`
+	}
+	decode(t, listEnvelope.Data, &recordsResponse)
+	if len(recordsResponse.Records) != 3 || recordsResponse.Records[0]["id"] == "" || len(recordsResponse.Trend) != 3 {
+		t.Fatalf("expected three persisted INR records and trend points, got %#v", recordsResponse)
 	}
 }
 
@@ -129,7 +132,6 @@ func TestMedicationRecordAndHomeSummary(t *testing.T) {
 	medicationPayload := `{
 		"actionType":"taken",
 		"actualDoseTablets":1.5,
-		"clientTime":"2026-04-24T08:30:00Z",
 		"tomorrowDoseMode":"manual",
 		"tomorrowDoseTablets":1.25
 	}`

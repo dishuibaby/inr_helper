@@ -2,6 +2,13 @@ declare global {
   const App: <T>(options: T) => void;
   const Page: <T>(options: T) => void;
   const getApp: <T>() => T;
+  const __wxConfig:
+    | {
+        env?: {
+          API_BASE_URL?: string;
+        };
+      }
+    | undefined;
 
   const wx: {
     request<T = unknown>(options: {

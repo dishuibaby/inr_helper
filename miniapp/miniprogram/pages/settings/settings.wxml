@@ -1,4 +1,7 @@
 <view class="page">
+  <view wx:if="{{loading}}" class="state-card">正在加载设置…</view>
+  <view wx:elif="{{errorText}}" class="state-card warning">{{errorText}}</view>
+
   <view class="card">
     <view class="label">默认检测方式</view>
     <picker mode="selector" range="{{methodOptions}}" range-key="label" value="{{methodIndex}}" bindchange="onMethodChange">
@@ -8,12 +11,21 @@
 
   <view class="card">
     <view class="label">INR 校正偏移</view>
-    <input class="input" type="digit" value="{{offsetInput}}" bindinput="onOffsetInput" placeholder="例如 0.05" />
+    <input class="input" type="digit" value="{{offsetInput}}" bindinput="onOffsetInput" placeholder="-1.00 到 1.00" />
+    <view class="help-text">仅用于展示校正值，不改变医生治疗方案。</view>
+  </view>
+
+  <view class="card">
+    <view class="label">目标 INR 范围</view>
+    <view class="inline-inputs">
+      <input class="input half" type="digit" value="{{targetMinInput}}" bindinput="onTargetMinInput" placeholder="下限" />
+      <input class="input half" type="digit" value="{{targetMaxInput}}" bindinput="onTargetMaxInput" placeholder="上限" />
+    </view>
   </view>
 
   <view class="card">
     <view class="label">检测周期</view>
-    <input class="input" type="number" value="{{cycleValueInput}}" bindinput="onCycleValueInput" placeholder="周期数" />
+    <input class="input" type="number" value="{{cycleValueInput}}" bindinput="onCycleValueInput" placeholder="1 到 365" />
     <picker mode="selector" range="{{cycleOptions}}" range-key="label" value="{{cycleIndex}}" bindchange="onCycleUnitChange">
       <view class="picker-value">单位：{{cycleOptions[cycleIndex].label}}</view>
     </picker>
@@ -24,5 +36,5 @@
     <view>静脉血、指尖血、家用仪检测</view>
   </view>
 
-  <button class="primary-button" bindtap="onSave">保存设置</button>
+  <button class="primary-button" loading="{{saving}}" disabled="{{saving}}" bindtap="onSave">保存设置</button>
 </view>

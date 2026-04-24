@@ -39,14 +39,9 @@ func (s *Service) HomeSummary() model.HomeSummary {
 }
 
 func (s *Service) CreateMedication(req model.CreateMedicationRecordRequest) (model.MedicationRecord, error) {
-	clientTime, err := parseOptionalTime(req.ClientTime)
-	if err != nil {
-		return model.MedicationRecord{}, err
-	}
 	record := model.MedicationRecord{
 		ActionType:          req.ActionType,
 		ActualDoseTablets:   req.ActualDoseTablets,
-		ClientTime:          clientTime,
 		RecordedAt:          s.now(),
 		TomorrowDoseMode:    req.TomorrowDoseMode,
 		TomorrowDoseTablets: req.TomorrowDoseTablets,
@@ -54,8 +49,26 @@ func (s *Service) CreateMedication(req model.CreateMedicationRecordRequest) (mod
 	return s.repo.CreateMedication(record), nil
 }
 
-func (s *Service) ListINR() []model.INRRecord {
-	return s.repo.ListINR()
+func (s *Service) ListINR() model.INRRecordsResponse {
+	settings := s.repo.GetSettings()
+	records := s.repo.ListINR()
+	trend := make([]model.INRTrendPoint, 0, len(records))
+	for i := len(records) - 1; i >= 0; i-- {
+		record := records[i]
+		trend = append(trend, model.INRTrendPoint{
+			Date:           record.TestedAt.Format("01-02"),
+			RawValue:       record.RawValue,
+			CorrectedValue: record.CorrectedValue,
+		})
+	}
+	return model.INRRecordsResponse{
+		Records: records,
+		Trend:   trend,
+		TargetRange: model.TargetRange{
+			Min: settings.TargetINRMin,
+			Max: settings.TargetINRMax,
+		},
+	}
 }
 
 func (s *Service) CreateINR(req model.CreateINRRecordRequest) (model.INRRecord, error) {
@@ -72,6 +85,7 @@ func (s *Service) CreateINR(req model.CreateINRRecordRequest) (model.INRRecord, 
 	record := model.INRRecord{
 		RawValue:       req.RawValue,
 		CorrectedValue: correctedValue,
+		Trend:          inrTrend(correctedValue, settings),
 		AbnormalTier:   abnormalTier(correctedValue, settings),
 		TestMethod:     req.TestMethod,
 		TestedAt:       testedAt,
@@ -119,6 +133,16 @@ func abnormalTier(value float64, settings model.UserSettings) string {
 		return "weak_high"
 	}
 	return "normal"
+}
+
+func inrTrend(value float64, settings model.UserSettings) string {
+	if value < settings.TargetINRMin {
+		return "low"
+	}
+	if value > settings.TargetINRMax {
+		return "high"
+	}
+	return "in_range"
 }
 
 func nextTestTime(now time.Time, cycle model.TestCycle) time.Time {

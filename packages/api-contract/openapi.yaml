@@ -8,12 +8,6 @@ info:
 servers:
   - url: http://127.0.0.1:8080/api/v1
 paths:
-  /healthz:
-    get:
-      summary: Health check
-      responses:
-        '200':
-          description: OK
   /home/summary:
     get:
       summary: Home summary
@@ -23,7 +17,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnvelopeHomeSummary'
+                $ref: '#/components/schemas/HomeSummaryEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /medication/records:
     post:
       summary: Create medication action record
@@ -35,13 +31,25 @@ paths:
               $ref: '#/components/schemas/CreateMedicationRecordRequest'
       responses:
         '200':
-          description: Created record
+          description: Created medication record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationRecordEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /inr/records:
     get:
       summary: List INR records
       responses:
         '200':
-          description: INR records with raw and corrected values
+          description: INR records sorted by testedAt descending
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/INRRecordListEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
     post:
       summary: Create INR record
       requestBody:
@@ -52,13 +60,25 @@ paths:
               $ref: '#/components/schemas/CreateINRRecordRequest'
       responses:
         '200':
-          description: Created record
+          description: Created INR record with raw, corrected, trend and tier fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/INRRecordEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /settings:
     get:
       summary: Get user settings
       responses:
         '200':
           description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
     put:
       summary: Update user settings
       requestBody:
@@ -70,11 +90,24 @@ paths:
       responses:
         '200':
           description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsEnvelope'
+        '400':
+          $ref: '#/components/responses/BadRequest'
 components:
+  responses:
+    BadRequest:
+      description: Validation or parsing error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
   schemas:
-    EnvelopeHomeSummary:
+    BaseEnvelope:
       type: object
-      required: [code, message, data]
+      required: [code, message]
       properties:
         code:
           type: integer
@@ -82,37 +115,94 @@ components:
         message:
           type: string
           example: ok
-        data:
-          $ref: '#/components/schemas/HomeSummary'
+    ErrorEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/BaseEnvelope'
+        - type: object
+          properties:
+            code:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: time must be RFC3339
+    HomeSummaryEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/BaseEnvelope'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/HomeSummary'
+    MedicationRecordEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/BaseEnvelope'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/MedicationRecord'
+    INRRecordEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/BaseEnvelope'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/INRRecord'
+    INRRecordListEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/BaseEnvelope'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/INRRecord'
+    UserSettingsEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/BaseEnvelope'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/UserSettings'
+    Reminder:
+      type: object
+      required: [level, title, body]
+      properties:
+        level:
+          type: string
+          enum: [normal, weak, strong]
+        title:
+          type: string
+        body:
+          type: string
+    TodayMedication:
+      type: object
+      required: [status, plannedDoseTablets]
+      properties:
+        status:
+          type: string
+          enum: [pending, taken, paused, missed]
+        plannedDoseTablets:
+          type: number
     HomeSummary:
       type: object
       required: [prominentReminder, latestInr, nextTestAt, todayMedication]
       properties:
         prominentReminder:
-          type: object
-          required: [level, title, body]
-          properties:
-            level:
-              type: string
-              enum: [normal, weak, strong]
-            title:
-              type: string
-            body:
-              type: string
+          $ref: '#/components/schemas/Reminder'
         latestInr:
-          $ref: '#/components/schemas/INRRecord'
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/INRRecord'
         nextTestAt:
           type: string
           format: date-time
         todayMedication:
-          type: object
-          required: [status, plannedDoseTablets]
-          properties:
-            status:
-              type: string
-              enum: [pending, taken, paused, missed]
-            plannedDoseTablets:
-              type: number
+          $ref: '#/components/schemas/TodayMedication'
     CreateMedicationRecordRequest:
       type: object
       required: [actionType, actualDoseTablets, tomorrowDoseMode]
@@ -122,7 +212,26 @@ components:
           enum: [taken, paused, missed]
         actualDoseTablets:
           type: number
-        clientTime:
+        tomorrowDoseMode:
+          type: string
+          enum: [planned, manual]
+        tomorrowDoseTablets:
+          type: number
+          nullable: true
+          description: Required by clients when tomorrowDoseMode is manual.
+    MedicationRecord:
+      type: object
+      required: [id, actionType, actualDoseTablets, recordedAt, tomorrowDoseMode]
+      properties:
+        id:
+          type: string
+          example: med-1
+        actionType:
+          type: string
+          enum: [taken, paused, missed]
+        actualDoseTablets:
+          type: number
+        recordedAt:
           type: string
           format: date-time
         tomorrowDoseMode:
@@ -130,15 +239,19 @@ components:
           enum: [planned, manual]
         tomorrowDoseTablets:
           type: number
+          nullable: true
     CreateINRRecordRequest:
       type: object
       required: [rawValue, testMethod, testedAt]
       properties:
         rawValue:
           type: number
+          exclusiveMinimum: true
+          minimum: 0
         offset:
           type: number
-          description: Correction offset applied to raw value.
+          nullable: true
+          description: Optional correction offset. Defaults to settings.inrOffset when omitted.
         testMethod:
           type: string
           enum: [hospital_lab, poct_device, home_device, other]
@@ -147,22 +260,40 @@ components:
           format: date-time
     INRRecord:
       type: object
-      required: [id, rawValue, correctedValue, abnormalTier, testMethod, testedAt]
+      required: [id, rawValue, correctedValue, trend, abnormalTier, testMethod, testedAt]
       properties:
         id:
           type: string
+          example: inr-1
         rawValue:
           type: number
         correctedValue:
           type: number
+          description: rawValue plus either request offset or settings.inrOffset.
+        trend:
+          type: string
+          enum: [low, in_range, high]
+          description: Directional placement of correctedValue against the configured target range.
         abnormalTier:
           type: string
           enum: [normal, weak_low, weak_high, strong_low, strong_high]
+          description: Risk tier using the configured target range and a 0.1 weak band.
         testMethod:
           type: string
+          enum: [hospital_lab, poct_device, home_device, other]
         testedAt:
           type: string
           format: date-time
+    TestCycle:
+      type: object
+      required: [unit, interval]
+      properties:
+        unit:
+          type: string
+          enum: [day, week, month]
+        interval:
+          type: integer
+          minimum: 1
     UserSettings:
       type: object
       required: [targetInrMin, targetInrMax, defaultMedicationTime, testCycle, testMethods, inrOffset]
@@ -176,20 +307,14 @@ components:
         defaultMedicationTime:
           type: string
           example: '08:00'
+        testCycle:
+          $ref: '#/components/schemas/TestCycle'
+        testMethods:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [hospital_lab, poct_device, home_device, other]
         inrOffset:
           type: number
           example: 0.0
-        testMethods:
-          type: array
-          items:
-            type: string
-        testCycle:
-          type: object
-          required: [unit, interval]
-          properties:
-            unit:
-              type: string
-              enum: [day, week, month]
-            interval:
-              type: integer
-              minimum: 1
