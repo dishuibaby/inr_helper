@@ -1,0 +1,177 @@
+package tests
+
+import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"warfarin-inr-demo/server/internal/router"
+)
+
+type envelope struct {
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Data    json.RawMessage `json:"data"`
+}
+
+func TestHealthz(t *testing.T) {
+	r := router.New()
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+	var body map[string]string
+	decode(t, w.Body.Bytes(), &body)
+	if body["status"] != "ok" {
+		t.Fatalf("expected status ok, got %#v", body)
+	}
+}
+
+func TestSettingsGetAndPut(t *testing.T) {
+	r := router.New()
+
+	initial := request(t, r, http.MethodGet, "/api/v1/settings", nil)
+	if initial.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", initial.Code)
+	}
+	var initialEnvelope envelope
+	decode(t, initial.Body.Bytes(), &initialEnvelope)
+	if initialEnvelope.Code != 0 {
+		t.Fatalf("expected envelope ok, got %#v", initialEnvelope)
+	}
+
+	payload := `{
+		"targetInrMin":1.8,
+		"targetInrMax":2.5,
+		"defaultMedicationTime":"20:30",
+		"testCycle":{"unit":"day","interval":3},
+		"testMethods":["home_device"],
+		"inrOffset":0.2
+	}`
+	updated := request(t, r, http.MethodPut, "/api/v1/settings", []byte(payload))
+	if updated.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d body %s", updated.Code, updated.Body.String())
+	}
+
+	var updatedEnvelope envelope
+	decode(t, updated.Body.Bytes(), &updatedEnvelope)
+	var settings map[string]interface{}
+	decode(t, updatedEnvelope.Data, &settings)
+	if settings["defaultMedicationTime"] != "20:30" || settings["inrOffset"].(float64) != 0.2 {
+		t.Fatalf("settings were not updated: %#v", settings)
+	}
+}
+
+func TestINRRecordsGetAndPost(t *testing.T) {
+	r := router.New()
+
+	payload := `{"rawValue":2.1,"offset":0.1,"testMethod":"hospital_lab","testedAt":"2026-04-24T08:00:00Z"}`
+	created := request(t, r, http.MethodPost, "/api/v1/inr/records", []byte(payload))
+	if created.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d body %s", created.Code, created.Body.String())
+	}
+
+	var createdEnvelope envelope
+	decode(t, created.Body.Bytes(), &createdEnvelope)
+	var record map[string]interface{}
+	decode(t, createdEnvelope.Data, &record)
+	if record["correctedValue"].(float64) != 2.2 || record["abnormalTier"] != "normal" {
+		t.Fatalf("unexpected INR record: %#v", record)
+	}
+
+	weakPayload := `{"rawValue":2.56,"offset":0,"testMethod":"hospital_lab","testedAt":"2026-04-25T08:00:00Z"}`
+	weak := request(t, r, http.MethodPost, "/api/v1/inr/records", []byte(weakPayload))
+	if weak.Code != http.StatusOK {
+		t.Fatalf("expected weak status 200, got %d body %s", weak.Code, weak.Body.String())
+	}
+	var weakEnvelope envelope
+	decode(t, weak.Body.Bytes(), &weakEnvelope)
+	var weakRecord map[string]interface{}
+	decode(t, weakEnvelope.Data, &weakRecord)
+	if weakRecord["abnormalTier"] != "weak_high" {
+		t.Fatalf("expected weak_high for +0.06 above max, got %#v", weakRecord)
+	}
+
+	strongPayload := `{"rawValue":2.7,"offset":0,"testMethod":"hospital_lab","testedAt":"2026-04-26T08:00:00Z"}`
+	strong := request(t, r, http.MethodPost, "/api/v1/inr/records", []byte(strongPayload))
+	if strong.Code != http.StatusOK {
+		t.Fatalf("expected strong status 200, got %d body %s", strong.Code, strong.Body.String())
+	}
+	var strongEnvelope envelope
+	decode(t, strong.Body.Bytes(), &strongEnvelope)
+	var strongRecord map[string]interface{}
+	decode(t, strongEnvelope.Data, &strongRecord)
+	if strongRecord["abnormalTier"] != "strong_high" {
+		t.Fatalf("expected strong_high for +0.2 above max, got %#v", strongRecord)
+	}
+
+	listed := request(t, r, http.MethodGet, "/api/v1/inr/records", nil)
+	if listed.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", listed.Code)
+	}
+	var listEnvelope envelope
+	decode(t, listed.Body.Bytes(), &listEnvelope)
+	var records []map[string]interface{}
+	decode(t, listEnvelope.Data, &records)
+	if len(records) != 3 || records[0]["id"] == "" {
+		t.Fatalf("expected three persisted INR records, got %#v", records)
+	}
+}
+
+func TestMedicationRecordAndHomeSummary(t *testing.T) {
+	r := router.New()
+
+	medicationPayload := `{
+		"actionType":"taken",
+		"actualDoseTablets":1.5,
+		"clientTime":"2026-04-24T08:30:00Z",
+		"tomorrowDoseMode":"manual",
+		"tomorrowDoseTablets":1.25
+	}`
+	created := request(t, r, http.MethodPost, "/api/v1/medication/records", []byte(medicationPayload))
+	if created.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d body %s", created.Code, created.Body.String())
+	}
+	var createdEnvelope envelope
+	decode(t, created.Body.Bytes(), &createdEnvelope)
+	var medication map[string]interface{}
+	decode(t, createdEnvelope.Data, &medication)
+	if medication["actionType"] != "taken" || medication["tomorrowDoseMode"] != "manual" {
+		t.Fatalf("unexpected medication record: %#v", medication)
+	}
+
+	summaryResponse := request(t, r, http.MethodGet, "/api/v1/home/summary", nil)
+	if summaryResponse.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", summaryResponse.Code)
+	}
+	var summaryEnvelope envelope
+	decode(t, summaryResponse.Body.Bytes(), &summaryEnvelope)
+	var summary map[string]interface{}
+	decode(t, summaryEnvelope.Data, &summary)
+	if summary["prominentReminder"] == nil || summary["nextTestAt"] == "" || summary["todayMedication"] == nil {
+		t.Fatalf("summary missing required fields: %#v", summary)
+	}
+}
+
+func request(t *testing.T, r http.Handler, method string, path string, body []byte) *httptest.ResponseRecorder {
+	t.Helper()
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(method, path, bytes.NewReader(body))
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	r.ServeHTTP(w, req)
+	return w
+}
+
+func decode(t *testing.T, data []byte, target interface{}) {
+	t.Helper()
+	if err := json.Unmarshal(data, target); err != nil {
+		t.Fatalf("failed to decode JSON %s: %v", string(data), err)
+	}
+}
