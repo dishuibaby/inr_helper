@@ -65,6 +65,10 @@ func TestSettingsGetAndPut(t *testing.T) {
 	if settings["defaultMedicationTime"] != "20:30" || settings["inrOffset"].(float64) != 0.2 {
 		t.Fatalf("settings were not updated: %#v", settings)
 	}
+	settingsCopy := settings["displayText"].(map[string]interface{})
+	if settingsCopy["locale"] != "zh-CN" || settingsCopy["testMethodTitle"] != "检测方式" || settingsCopy["saveAction"] != "保存设置" {
+		t.Fatalf("settings should include server-provided display text: %#v", settingsCopy)
+	}
 }
 
 func TestINRRecordsGetAndPost(t *testing.T) {
@@ -82,6 +86,10 @@ func TestINRRecordsGetAndPost(t *testing.T) {
 	decode(t, createdEnvelope.Data, &record)
 	if record["correctedValue"].(float64) != 2.2 || record["offsetValue"].(float64) != 0.1 || record["abnormalTier"] != "normal" || record["trend"] != "in_range" {
 		t.Fatalf("unexpected INR record: %#v", record)
+	}
+	createdDisplay := record["displayText"].(map[string]interface{})
+	if createdDisplay["statusLabel"] != "正常" || createdDisplay["rawLabel"] != "校准前" {
+		t.Fatalf("created INR record should include display text from server: %#v", createdDisplay)
 	}
 
 	weakPayload := `{"rawValue":2.56,"offset":0,"testMethod":"hospital_lab","testedAt":"2026-04-25T08:00:00Z"}`
@@ -120,6 +128,7 @@ func TestINRRecordsGetAndPost(t *testing.T) {
 		Records     []map[string]interface{} `json:"records"`
 		Trend       []map[string]interface{} `json:"trend"`
 		TargetRange map[string]interface{}   `json:"targetRange"`
+		DisplayText map[string]interface{}   `json:"displayText"`
 	}
 	decode(t, listEnvelope.Data, &recordsResponse)
 	if len(recordsResponse.Records) != 3 || recordsResponse.Records[0]["id"] == "" || len(recordsResponse.Trend) != 3 {
@@ -130,6 +139,11 @@ func TestINRRecordsGetAndPost(t *testing.T) {
 	}
 	if recordsResponse.Records[2]["offsetValue"].(float64) != 0.1 || recordsResponse.Trend[0]["rawValue"].(float64) != 2.1 || recordsResponse.Trend[0]["correctedValue"].(float64) != 2.2 {
 		t.Fatalf("INR response should expose raw/corrected/offset contract fields: %#v", recordsResponse)
+	}
+	trendCopy := recordsResponse.DisplayText["trend"].(map[string]interface{})
+	labelsCopy := recordsResponse.DisplayText["recordLabels"].(map[string]interface{})
+	if recordsResponse.DisplayText["locale"] != "zh-CN" || trendCopy["correctedSeriesLabel"] != "校准后" || labelsCopy["strongHigh"] != "强提示" {
+		t.Fatalf("INR list should include server-provided display text: %#v", recordsResponse.DisplayText)
 	}
 }
 
@@ -164,6 +178,11 @@ func TestMedicationRecordAndHomeSummary(t *testing.T) {
 	decode(t, summaryEnvelope.Data, &summary)
 	if summary["prominentReminder"] == nil || summary["nextTestAt"] == "" || summary["todayMedication"] == nil {
 		t.Fatalf("summary missing required fields: %#v", summary)
+	}
+	displayText := summary["displayText"].(map[string]interface{})
+	todayCopy := displayText["todayMedication"].(map[string]interface{})
+	if displayText["locale"] != "zh-CN" || todayCopy["primaryAction"] != "完成服药" || todayCopy["tomorrowDoseTitle"] != "选择明日剂量" {
+		t.Fatalf("home summary should include server-provided display text: %#v", displayText)
 	}
 }
 

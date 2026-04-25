@@ -128,6 +128,44 @@ func TestHomeSummaryIncludesLatestINRNextTestAndProminentReminder(t *testing.T) 
 	if summary.ProminentReminder.Level != "strong" || summary.ProminentReminder.Title != "INR 结果需关注" {
 		t.Fatalf("expected strong INR reminder, got %#v", summary.ProminentReminder)
 	}
+	if summary.DisplayText.Locale != "zh-CN" {
+		t.Fatalf("summary display text should declare locale, got %#v", summary.DisplayText)
+	}
+	if summary.DisplayText.LatestINR.Label != "最新 INR" || summary.DisplayText.LatestINR.RawLabel != "校准前" {
+		t.Fatalf("summary should include server-provided latest INR copy, got %#v", summary.DisplayText.LatestINR)
+	}
+	if summary.LatestINR.DisplayText.StatusLabel != "强提示" || summary.LatestINR.DisplayText.RawLabel != "校准前" {
+		t.Fatalf("latest INR should include record display text, got %#v", summary.LatestINR.DisplayText)
+	}
+	if summary.DisplayText.NextTest.Label != "下次检测" || summary.DisplayText.NextTest.CycleText != "每 3 天" {
+		t.Fatalf("summary should include server-provided next test copy, got %#v", summary.DisplayText.NextTest)
+	}
+	if summary.DisplayText.TodayMedication.PrimaryAction != "完成服药" || summary.DisplayText.TodayMedication.TomorrowDoseTitle != "选择明日剂量" {
+		t.Fatalf("summary should include server-provided medication copy, got %#v", summary.DisplayText.TodayMedication)
+	}
+}
+
+func TestListINRIncludesServerDisplayTextForClientCopy(t *testing.T) {
+	svc, _ := newTestService(t, "2026-04-24T08:00:00Z")
+
+	_, err := svc.CreateINR(model.CreateINRRecordRequest{RawValue: 2.61, Offset: ptr(0), TestMethod: "hospital_lab", TestedAt: "2026-04-24T08:00:00Z"})
+	if err != nil {
+		t.Fatalf("CreateINR returned error: %v", err)
+	}
+
+	response := svc.ListINR()
+	if response.DisplayText.Locale != "zh-CN" {
+		t.Fatalf("INR response display text should declare locale, got %#v", response.DisplayText)
+	}
+	if response.DisplayText.Trend.Title != "INR 趋势" || response.DisplayText.Trend.CorrectedSeriesLabel != "校准后" || response.DisplayText.Trend.RawSeriesLabel != "校准前" {
+		t.Fatalf("INR trend copy should come from server contract, got %#v", response.DisplayText.Trend)
+	}
+	if response.DisplayText.RecordLabels.StrongHigh != "强提示" || response.DisplayText.RecordLabels.WeakHigh != "弱提示" || response.DisplayText.RecordLabels.Normal != "正常" {
+		t.Fatalf("INR record tier labels should come from server contract, got %#v", response.DisplayText.RecordLabels)
+	}
+	if len(response.Records) != 1 || response.Records[0].DisplayText.StatusLabel != "强提示" || response.Records[0].DisplayText.Note == "" {
+		t.Fatalf("INR record should include server-provided status label and note, got %#v", response.Records)
+	}
 }
 
 func TestCreateMedicationRecordsSystemTimeAndTomorrowDoseChoice(t *testing.T) {
@@ -156,6 +194,26 @@ func TestCreateMedicationRecordsSystemTimeAndTomorrowDoseChoice(t *testing.T) {
 	}
 	if planned.TomorrowDoseMode != "planned" || planned.TomorrowDoseTablets != nil {
 		t.Fatalf("planned mode should not require manual tomorrow dose: %#v", planned)
+	}
+}
+
+func TestGetSettingsIncludesServerDisplayText(t *testing.T) {
+	svc, repo := newTestService(t, "2026-04-24T08:00:00Z")
+	repo.UpdateSettings(model.UserSettings{
+		TargetINRMin:          1.8,
+		TargetINRMax:          2.5,
+		DefaultMedicationTime: "08:00",
+		TestCycle:             model.TestCycle{Unit: "month", Interval: 1},
+		TestMethods:           []string{"hospital_lab", "home_device"},
+		INROffset:             0.1,
+	})
+
+	settings := svc.GetSettings()
+	if settings.DisplayText.Locale != "zh-CN" || settings.DisplayText.TestMethodTitle != "检测方式" {
+		t.Fatalf("settings should include server-provided display text: %#v", settings.DisplayText)
+	}
+	if settings.DisplayText.CycleHint != "每 1 月" {
+		t.Fatalf("settings cycle hint should reflect configured cycle, got %q", settings.DisplayText.CycleHint)
 	}
 }
 

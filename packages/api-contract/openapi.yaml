@@ -86,7 +86,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserSettings'
+              $ref: '#/components/schemas/UpdateUserSettingsRequest'
       responses:
         '200':
           description: Updated settings
@@ -160,7 +160,7 @@ components:
               $ref: '#/components/schemas/INRRecordsResponse'
     INRRecordsResponse:
       type: object
-      required: [records, trend, targetRange]
+      required: [records, trend, targetRange, displayText]
       properties:
         records:
           type: array
@@ -173,6 +173,8 @@ components:
             $ref: '#/components/schemas/INRTrendPoint'
         targetRange:
           $ref: '#/components/schemas/TargetRange'
+        displayText:
+          $ref: '#/components/schemas/INRRecordsDisplayText'
     INRTrendPoint:
       type: object
       required: [date, rawValue, correctedValue]
@@ -224,7 +226,7 @@ components:
           type: number
     HomeSummary:
       type: object
-      required: [prominentReminder, latestInr, nextTestAt, todayMedication]
+      required: [prominentReminder, latestInr, nextTestAt, todayMedication, displayText]
       properties:
         prominentReminder:
           $ref: '#/components/schemas/Reminder'
@@ -237,6 +239,8 @@ components:
           format: date-time
         todayMedication:
           $ref: '#/components/schemas/TodayMedication'
+        displayText:
+          $ref: '#/components/schemas/HomeSummaryDisplayText'
     CreateMedicationRecordRequest:
       type: object
       required: [actionType, actualDoseTablets, tomorrowDoseMode]
@@ -294,7 +298,7 @@ components:
           format: date-time
     INRRecord:
       type: object
-      required: [id, rawValue, offsetValue, correctedValue, trend, abnormalTier, testMethod, testedAt]
+      required: [id, rawValue, offsetValue, correctedValue, trend, abnormalTier, testMethod, testedAt, displayText]
       properties:
         id:
           type: string
@@ -321,6 +325,89 @@ components:
         testedAt:
           type: string
           format: date-time
+        displayText:
+          $ref: '#/components/schemas/INRRecordDisplayText'
+    HomeSummaryDisplayText:
+      type: object
+      required: [locale, latestInr, nextTest, todayMedication]
+      properties:
+        locale:
+          type: string
+          example: zh-CN
+        latestInr:
+          $ref: '#/components/schemas/LatestINRDisplayText'
+        nextTest:
+          $ref: '#/components/schemas/NextTestDisplayText'
+        todayMedication:
+          $ref: '#/components/schemas/TodayMedicationDisplayText'
+    LatestINRDisplayText:
+      type: object
+      required: [label, targetLabel, rawLabel]
+      properties:
+        label: { type: string, example: 最新 INR }
+        targetLabel: { type: string, example: 目标 1.8–2.5 }
+        rawLabel: { type: string, example: 校准前 }
+    NextTestDisplayText:
+      type: object
+      required: [label, cycleText]
+      properties:
+        label: { type: string, example: 下次检测 }
+        cycleText: { type: string, example: 每 2 周 }
+    TodayMedicationDisplayText:
+      type: object
+      required: [title, primaryAction, pauseAction, missAction, yesterdayDoseText, statusText, tomorrowDoseTitle, plannedDoseLabel, manualDoseLabel, recordedAtHint, confirmAction]
+      properties:
+        title: { type: string, example: 今日服药 }
+        primaryAction: { type: string, example: 完成服药 }
+        pauseAction: { type: string, example: 停服 }
+        missAction: { type: string, example: 漏服 }
+        yesterdayDoseText: { type: string, example: 昨日服药量：1.5 片 }
+        statusText: { type: string, example: 状态：待完成 }
+        tomorrowDoseTitle: { type: string, example: 选择明日剂量 }
+        plannedDoseLabel: { type: string, example: 按计划服用 }
+        manualDoseLabel: { type: string, example: 手动输入 }
+        recordedAtHint: { type: string, example: 系统记录当前操作时间作为服药时间 }
+        confirmAction: { type: string, example: 确认明日剂量 }
+    INRRecordDisplayText:
+      type: object
+      required: [statusLabel, note, rawLabel, methodLabel]
+      properties:
+        statusLabel: { type: string, example: 正常 }
+        note: { type: string, example: 处于目标范围，继续按周期记录与复测。 }
+        rawLabel: { type: string, example: 校准前 }
+        methodLabel: { type: string, example: 家用指尖血 INR 仪 }
+    INRRecordsDisplayText:
+      type: object
+      required: [locale, trend, recordLabels, recordsTitle, recordsHint]
+      properties:
+        locale:
+          type: string
+          example: zh-CN
+        trend:
+          $ref: '#/components/schemas/INRTrendDisplayText'
+        recordLabels:
+          $ref: '#/components/schemas/INRRecordLabelsDisplayText'
+        recordsTitle: { type: string, example: INR 检测记录 }
+        recordsHint: { type: string, example: 校准后为主，校准前作为参考 }
+    INRTrendDisplayText:
+      type: object
+      required: [title, subtitle, correctedSeriesLabel, rawSeriesLabel, strongLabel, weakLabel]
+      properties:
+        title: { type: string, example: INR 趋势 }
+        subtitle: { type: string, example: 校准后 / 校准前 }
+        correctedSeriesLabel: { type: string, example: 校准后 }
+        rawSeriesLabel: { type: string, example: 校准前 }
+        strongLabel: { type: string, example: 强异常 }
+        weakLabel: { type: string, example: 弱提示 }
+    INRRecordLabelsDisplayText:
+      type: object
+      required: [normal, weakLow, strongLow, weakHigh, strongHigh]
+      properties:
+        normal: { type: string, example: 正常 }
+        weakLow: { type: string, example: 弱提示 }
+        strongLow: { type: string, example: 强提示 }
+        weakHigh: { type: string, example: 弱提示 }
+        strongHigh: { type: string, example: 强提示 }
     TestCycle:
       type: object
       required: [unit, interval]
@@ -331,7 +418,7 @@ components:
         interval:
           type: integer
           minimum: 1
-    UserSettings:
+    UpdateUserSettingsRequest:
       type: object
       required: [targetInrMin, targetInrMax, defaultMedicationTime, testCycle, testMethods, inrOffset]
       properties:
@@ -355,3 +442,67 @@ components:
         inrOffset:
           type: number
           example: 0.0
+    UserSettings:
+      type: object
+      required: [targetInrMin, targetInrMax, defaultMedicationTime, testCycle, testMethods, inrOffset, displayText]
+      properties:
+        targetInrMin:
+          type: number
+          example: 1.8
+        targetInrMax:
+          type: number
+          example: 2.5
+        defaultMedicationTime:
+          type: string
+          example: '08:00'
+        testCycle:
+          $ref: '#/components/schemas/TestCycle'
+        testMethods:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [hospital_lab, poct_device, home_device, other]
+        inrOffset:
+          type: number
+          example: 0.0
+        displayText:
+          $ref: '#/components/schemas/SettingsDisplayText'
+    SettingsDisplayText:
+      type: object
+      description: 设置页业务文案，由服务端返回以支持后续多语言。
+      required: [locale, inrRangeTitle, inrRangeHint, testMethodTitle, testMethodHint, offsetTitle, offsetHint, cycleTitle, cycleHint, medicationTimeTitle, saveAction]
+      properties:
+        locale:
+          type: string
+          example: zh-CN
+        inrRangeTitle:
+          type: string
+          example: 目标 INR 范围
+        inrRangeHint:
+          type: string
+          example: 当前目标 1.8–2.5，异常提示按 ±0.1 分层
+        testMethodTitle:
+          type: string
+          example: 检测方式
+        testMethodHint:
+          type: string
+          example: 可选择医院静脉血、POCT 或家用指尖血设备
+        offsetTitle:
+          type: string
+          example: 检测偏移量
+        offsetHint:
+          type: string
+          example: 全站优先显示校准后 INR，校准前数值弱展示
+        cycleTitle:
+          type: string
+          example: 检测周期
+        cycleHint:
+          type: string
+          example: 每 1 月
+        medicationTimeTitle:
+          type: string
+          example: 默认服药时间
+        saveAction:
+          type: string
+          example: 保存设置

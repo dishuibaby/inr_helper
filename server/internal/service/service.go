@@ -25,6 +25,8 @@ func (s *Service) HomeSummary() model.HomeSummary {
 	nextTestBase := today
 	if latestINR != nil {
 		nextTestBase = latestINR.TestedAt
+		displayReady := withINRDisplayText(*latestINR, settings)
+		latestINR = &displayReady
 	}
 	nextTestAt := nextTestTime(nextTestBase, settings.TestCycle)
 	reminder := model.Reminder{Level: "strong", Title: "今日服药待确认", Body: "请按医嘱完成服药记录，本应用不提供剂量调整建议。"}
@@ -40,7 +42,13 @@ func (s *Service) HomeSummary() model.HomeSummary {
 		reminder = model.Reminder{Level: "strong", Title: "INR 结果需关注", Body: "请联系医生确认后续处理，本应用不提供剂量调整建议。"}
 	}
 
-	return model.HomeSummary{ProminentReminder: reminder, LatestINR: latestINR, NextTestAt: nextTestAt, TodayMedication: todayMedication}
+	return model.HomeSummary{
+		ProminentReminder: reminder,
+		LatestINR:         latestINR,
+		NextTestAt:        nextTestAt,
+		TodayMedication:   todayMedication,
+		DisplayText:       homeSummaryDisplayText(settings, todayMedication),
+	}
 }
 
 func (s *Service) CreateMedication(req model.CreateMedicationRecordRequest) (model.MedicationRecord, error) {
@@ -66,6 +74,9 @@ func (s *Service) ListINR() model.INRRecordsResponse {
 			CorrectedValue: record.CorrectedValue,
 		})
 	}
+	for i := range records {
+		records[i] = withINRDisplayText(records[i], settings)
+	}
 	return model.INRRecordsResponse{
 		Records: records,
 		Trend:   trend,
@@ -73,6 +84,7 @@ func (s *Service) ListINR() model.INRRecordsResponse {
 			Min: settings.TargetINRMin,
 			Max: settings.TargetINRMax,
 		},
+		DisplayText: inrRecordsDisplayText(),
 	}
 }
 
@@ -96,18 +108,22 @@ func (s *Service) CreateINR(req model.CreateINRRecordRequest) (model.INRRecord, 
 		TestMethod:     req.TestMethod,
 		TestedAt:       testedAt,
 	}
-	return s.repo.CreateINR(record), nil
+	return withINRDisplayText(s.repo.CreateINR(record), settings), nil
 }
 
 func (s *Service) GetSettings() model.UserSettings {
-	return s.repo.GetSettings()
+	settings := s.repo.GetSettings()
+	settings.DisplayText = settingsDisplayText(settings)
+	return settings
 }
 
 func (s *Service) UpdateSettings(settings model.UserSettings) (model.UserSettings, error) {
 	if settings.TargetINRMin <= 0 || settings.TargetINRMax <= 0 || settings.TargetINRMin >= settings.TargetINRMax {
 		return model.UserSettings{}, errors.New("target INR range is invalid")
 	}
-	return s.repo.UpdateSettings(settings), nil
+	updated := s.repo.UpdateSettings(settings)
+	updated.DisplayText = settingsDisplayText(updated)
+	return updated, nil
 }
 
 func parseOptionalTime(value string) (time.Time, error) {

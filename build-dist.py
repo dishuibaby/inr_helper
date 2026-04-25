@@ -24,6 +24,7 @@ markdown_docs = [
     'docs/tech/base-data-and-schema-review.md',
     'docs/plans/2026-04-24-multiplatform-mvp.md',
     'docs/reports/2026-04-25-inr-refinement-implementation.md',
+    'docs/reports/2026-04-25-server-copy-contract.md',
 ]
 
 index = (root / 'index.html').read_text(encoding='utf-8')

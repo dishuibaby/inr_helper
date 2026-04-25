@@ -193,6 +193,9 @@ server/internal/
 - 所有时间使用服务端 UTC 存储，客户端按用户时区展示。
 - 对用户行为记录要保留 `client_time` 与 `server_time`。
 - 关键业务字段避免使用浮点直接参与严肃计算，INR 可用 decimal，剂量可同时存片数和 mg。
+- 用户可见的业务文案尽量由服务端返回结构化 `displayText` / `copy`，客户端只保留模块标题、固定导航和固定类型。
+- 文案响应需要携带 `locale`，默认 `zh-CN`；后续可按 `Accept-Language`、用户设置或租户配置切换语言包。
+- 首页、INR 列表、INR 创建响应、提醒和设置页均应返回足够的展示文案，避免 Flutter/小程序重复硬编码业务中文。
 - 接口返回统一 envelope：
 
 ```json
