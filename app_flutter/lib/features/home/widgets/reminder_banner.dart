@@ -16,7 +16,7 @@ class ReminderBanner extends StatelessWidget {
     };
 
     return Card(
-      color: color.withOpacity(0.10),
+      color: color.withValues(alpha: 0.10),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Row(

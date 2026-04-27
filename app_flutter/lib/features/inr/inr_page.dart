@@ -67,7 +67,7 @@ class _InrPageState extends ConsumerState<InrPage> {
                   TextField(controller: _offsetController, keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), decoration: const InputDecoration(labelText: '校正偏移')),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<TestMethod>(
-                    value: _testMethod,
+                    initialValue: _testMethod,
                     decoration: const InputDecoration(labelText: '检测方式'),
                     items: TestMethod.values.map((method) => DropdownMenuItem(value: method, child: Text(method.name))).toList(),
                     onChanged: (value) => setState(() => _testMethod = value ?? TestMethod.hospitalLab),

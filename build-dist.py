@@ -25,6 +25,7 @@ markdown_docs = [
     'docs/reports/2026-04-25-inr-refinement-implementation.md',
     'docs/reports/2026-04-25-server-copy-contract.md',
     'docs/reports/2026-04-27-project-boundary-independent-run.md',
+    'docs/reports/2026-04-27-flutter-sdk-verification.md',
 ]
 
 index = (root / 'index.html').read_text(encoding='utf-8')

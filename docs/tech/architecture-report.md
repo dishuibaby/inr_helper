@@ -184,7 +184,7 @@ API Server（单实例或容器）
 | 差距 | 影响 | 建议 |
 |---|---|---|
 | SQLite 单用户表结构 | 不能直接支撑多用户正式部署 | 下一阶段引入 MySQL migration 和 user_id |
-| Flutter CLI 不在当前机器 | 本机不能跑 Flutter 测试 | 安装 Flutter SDK 后补跑 `flutter test` |
+| Flutter 原生构建工具链未补齐 | 当前已可跑 `flutter analyze/test`，但 Android/iOS 真机构建还需要对应原生工具链 | Android 补 SDK/签名配置；iOS 使用 macOS/Xcode 构建 |
 | Redis 未接入 | 还没有登录态/限流/提醒锁 | 正式 API 前接入 Redis adapter |
 | 小程序服务通知未接入 | 微信提醒还不能真正触达 | 完成小程序模板消息配置后实现 |
 | 鉴权仍是 MVP | 不能开放真实公网 API | 接入微信登录/session 后再放开真实数据 |

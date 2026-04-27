@@ -43,6 +43,15 @@ rg "class .*ApiClient|FutureProvider|ConsumerWidget|ConsumerStatefulWidget" app_
 rg "latestInr|targetInrMin|tomorrowDoseMode|correctedValue" app_flutter/lib app_flutter/test
 ```
 
+
+### Local machine note
+
+On the current development machine, Flutter is installed under `/home/pi/.hermes/tools/flutter` and exposed as `/home/pi/.local/bin/flutter`. If a non-login shell cannot find it, prepend:
+
+```sh
+export PATH="$HOME/.hermes/tools/flutter/bin:$HOME/.local/bin:$PATH"
+```
+
 ## Running with mock data
 
 Mock API mode is enabled by default so the app can render before the backend is running:

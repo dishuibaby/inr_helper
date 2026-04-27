@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 const base = process.env.BASE_URL || 'http://127.0.0.1:8788';
-const paths = (process.env.PREVIEW_PATHS || '/README/,/docs/ui/README/,/docs/product/module-feature-inventory/,/docs/product/current-progress/,/docs/tech/technical-proposal/,/docs/tech/architecture-report/,/docs/tech/database-and-cache-design/,/docs/tech/base-data-and-schema-review/,/docs/plans/2026-04-24-multiplatform-mvp/,/docs/reports/2026-04-25-inr-refinement-implementation/,/docs/reports/2026-04-25-server-copy-contract/,/docs/reports/2026-04-27-project-boundary-independent-run/').split(',').filter(Boolean);
+const paths = (process.env.PREVIEW_PATHS || '/README/,/docs/ui/README/,/docs/product/module-feature-inventory/,/docs/product/current-progress/,/docs/tech/technical-proposal/,/docs/tech/architecture-report/,/docs/tech/database-and-cache-design/,/docs/tech/base-data-and-schema-review/,/docs/plans/2026-04-24-multiplatform-mvp/,/docs/reports/2026-04-25-inr-refinement-implementation/,/docs/reports/2026-04-25-server-copy-contract/,/docs/reports/2026-04-27-project-boundary-independent-run/,/docs/reports/2026-04-27-flutter-sdk-verification/').split(',').filter(Boolean);
 
 test('landing exposes categorized document entrypoints', async ({ page }) => {
   await page.goto(`${base}/`, { waitUntil: 'networkidle' });
@@ -20,7 +20,8 @@ test('landing exposes categorized document entrypoints', async ({ page }) => {
     '/docs/plans/2026-04-24-multiplatform-mvp/',
     '/docs/reports/2026-04-25-inr-refinement-implementation/',
     '/docs/reports/2026-04-25-server-copy-contract/',
-    '/docs/reports/2026-04-27-project-boundary-independent-run/'
+    '/docs/reports/2026-04-27-project-boundary-independent-run/',
+    '/docs/reports/2026-04-27-flutter-sdk-verification/'
   ]) {
     await expect(page.locator(`a[href="${href}"]`)).toHaveCount(1);
   }

@@ -6,10 +6,12 @@
 ## 2026-04-27
 
 ### Added
+- 新增 Flutter SDK 安装与端侧验证报告，记录本机 Flutter 环境安装、SDK 验证、端侧 analyze/test 结果与后续原生构建边界。
 - 新增项目边界与独立运行报告，明确根目录静态站、微信小程序、Flutter App、Go Server、OpenAPI 契约与文档目录的职责边界。
 - 新增静态三端路由覆盖测试 `route-coverage.spec.cjs`，覆盖 wechat/android/ios 的 42 个深链页面。
 
 ### Changed
+- Flutter 端修复新版 SDK analyze 问题，并提交 `pubspec.lock` 锁定依赖以提高测试复现性。
 - 静态构建脚本改为统一平台/路由清单生成深链目录，并在构建前校验声明路由必须存在入口文件。
 - 文档站首页和 Markdown 预览测试接入项目边界与独立运行报告。
 

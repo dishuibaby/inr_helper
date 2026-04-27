@@ -263,7 +263,8 @@ function landing() {
       links: [
         ['2026-04-25 INR 产品完善与契约对齐报告', '/docs/reports/2026-04-25-inr-refinement-implementation/'],
         ['2026-04-25 服务端文案契约与多语言准备报告', '/docs/reports/2026-04-25-server-copy-contract/'],
-        ['2026-04-27 项目边界与独立运行报告', '/docs/reports/2026-04-27-project-boundary-independent-run/']
+        ['2026-04-27 项目边界与独立运行报告', '/docs/reports/2026-04-27-project-boundary-independent-run/'],
+        ['2026-04-27 Flutter SDK 安装与端侧验证报告', '/docs/reports/2026-04-27-flutter-sdk-verification/']
       ]
     }
   ];
