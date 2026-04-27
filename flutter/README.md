@@ -38,9 +38,9 @@ flutter test
 If Flutter is unavailable in the current environment, perform lightweight static checks from the repository root:
 
 ```sh
-find app_flutter/lib app_flutter/test -type f | sort
-rg "class .*ApiClient|FutureProvider|ConsumerWidget|ConsumerStatefulWidget" app_flutter/lib
-rg "latestInr|targetInrMin|tomorrowDoseMode|correctedValue" app_flutter/lib app_flutter/test
+find flutter/lib flutter/test -type f | sort
+rg "class .*ApiClient|FutureProvider|ConsumerWidget|ConsumerStatefulWidget" flutter/lib
+rg "latestInr|targetInrMin|tomorrowDoseMode|correctedValue" flutter/lib flutter/test
 ```
 
 

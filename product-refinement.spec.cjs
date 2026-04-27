@@ -6,7 +6,7 @@ test.describe('2026-04 INR product refinement acceptance', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, deviceScaleFactor: 3 });
 
   test('home exposes latest INR, next test time, dual-line trend and mandatory prominent reminder', async ({ page }) => {
-    await page.goto(`${base}/wechat/home/`, { waitUntil: 'networkidle' });
+    await page.goto(`${base}/ui/wechat/home/`, { waitUntil: 'networkidle' });
     await expect(page.locator('.heroDose')).toContainText('今日服药');
     await expect(page.locator('.inrCard')).toContainText('最新 INR');
     await expect(page.locator('.inrCard .inrMetric strong')).toHaveText('2.1');
@@ -20,7 +20,7 @@ test.describe('2026-04 INR product refinement acceptance', () => {
   });
 
   test('dose completion requires choosing tomorrow dose with planned and manual UI, and no catch-up action', async ({ page }) => {
-    await page.goto(`${base}/wechat/home/`, { waitUntil: 'networkidle' });
+    await page.goto(`${base}/ui/wechat/home/`, { waitUntil: 'networkidle' });
     await expect(page.locator('body')).not.toContainText('补服');
     await page.getByRole('button', { name: '完成服药' }).click();
     await expect(page.locator('#doseDoneSheet')).toHaveClass(/open/);
@@ -32,7 +32,7 @@ test.describe('2026-04 INR product refinement acceptance', () => {
   });
 
   test('INR page shows weak vs strong abnormal tiers and raw value is visually secondary', async ({ page }) => {
-    await page.goto(`${base}/wechat/inr/`, { waitUntil: 'networkidle' });
+    await page.goto(`${base}/ui/wechat/inr/`, { waitUntil: 'networkidle' });
     await expect(page.locator('.alert.danger')).toContainText('必须关注');
     await expect(page.locator('.status.soft').first()).toContainText('弱提示');
     await expect(page.locator('.status.danger').first()).toContainText('强提示');
@@ -48,7 +48,7 @@ test.describe('2026-04 INR product refinement acceptance', () => {
   });
 
   test('settings support detection methods, offset rule and flexible day/week/month cycle', async ({ page }) => {
-    await page.goto(`${base}/wechat/inr-settings/`, { waitUntil: 'networkidle' });
+    await page.goto(`${base}/ui/wechat/inr-settings/`, { waitUntil: 'networkidle' });
     await expect(page.locator('body')).toContainText('检测方式');
     await expect(page.locator('body')).toContainText('偏移量');
     await expect(page.locator('body')).toContainText('校正后 INR');

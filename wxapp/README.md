@@ -1,17 +1,17 @@
 # 抗凝小助手微信小程序
 
-`miniapp/` 是微信小程序真实工程目录，区别于根目录下用于 Cloudflare 静态预览的 `/wechat/...` 路由目录。
+`wxapp/` 是微信小程序真实工程目录，区别于 `ui/` 下用于 Cloudflare 静态预览的 `/ui/wechat/...` 路由目录；旧 `/wechat/...` 仅做兼容访问。
 
 ## 独立运行边界
 
 - 本目录通过 TypeScript 小程序代码和本地测试验证业务交互模型。
 - 与服务端只通过 `/api/v1` JSON API 和 `packages/api-contract/openapi.yaml` 字段语义对接。
-- 不依赖根目录 `app.js`、`styles.css`、`index.html` 运行；这些文件只用于静态产品原型和文档站。
+- 不依赖 `ui/app.js`、`ui/styles.css`、根目录 `index.html` 运行；这些文件只用于静态产品原型和文档站。
 
 ## 本地验证
 
 ```bash
-cd miniapp
+cd wxapp
 npm test
 ```
 

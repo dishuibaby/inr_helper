@@ -30,7 +30,7 @@
 
 ### 3.3 静态客户端原型
 
-- `app.js` 新增模拟服务端 payload。
+- `ui/app.js` 新增模拟服务端 payload。
 - 首页“最新 INR”“下次检测”“超明显提醒”“完成服药后选择明日剂量”等文案从 payload 读取。
 - INR 页面异常分层、趋势图图例、记录说明从 payload 读取。
 - 设置页检测方式、偏移量、检测周期、完成后规则等说明从 payload 读取。
@@ -53,7 +53,7 @@
 
 - 服务端：`go test ./... && go vet ./...`。
 - 静态原型：`node --check app.js && node --check markdown.js && npm run build && npm run test:product && npm run test:md-preview`。
-- 小程序：`cd miniapp && npm test`。
+- 小程序：`cd wxapp && npm test`。
 - 安全扫描：新增 diff 中检查敏感词、危险函数和 whitespace。
 - 独立代码评审：通过子代理复核后再提交部署。
 - Cloudflare：部署后访问线上首页、报告页、微信首页和 INR 页面 smoke。

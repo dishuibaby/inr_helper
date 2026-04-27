@@ -8,7 +8,7 @@ on:
 
 jobs:
   validate:
-    name: Validate server, miniapp, and previews
+    name: Validate server, wxapp, Flutter, and previews
     runs-on: ubuntu-latest
     env:
       GOCACHE: ${{ runner.temp }}/go-build-cache
@@ -37,15 +37,29 @@ jobs:
           cache: npm
           cache-dependency-path: |
             package-lock.json
-            miniapp/package-lock.json
+            wxapp/package-lock.json
 
-      - name: Install miniapp dependencies
-        working-directory: miniapp
+      - name: Install wxapp dependencies
+        working-directory: wxapp
         run: npm ci
 
-      - name: Test miniapp
-        working-directory: miniapp
+      - name: Test wxapp
+        working-directory: wxapp
         run: npm test
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Analyze Flutter app
+        working-directory: flutter
+        run: flutter analyze
+
+      - name: Test Flutter app
+        working-directory: flutter
+        run: flutter test
 
       - name: Install root dependencies
         if: ${{ hashFiles('package-lock.json') != '' }}
@@ -62,3 +76,7 @@ jobs:
       - name: Test markdown preview
         if: ${{ hashFiles('markdown-preview.spec.cjs') != '' }}
         run: npm run test:md-preview --if-present
+
+      - name: Test route coverage
+        if: ${{ hashFiles('route-coverage.spec.cjs') != '' }}
+        run: npm run test:routes --if-present

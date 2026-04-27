@@ -16,13 +16,15 @@
 
 当前约定：
 
+- `ui/`：放可在线访问的轻量静态 UI 原型源码，Cloudflare 路径为 `/ui/`。
+- `docs/`：放产品、UI、技术、计划和报告文档，Cloudflare 路径为 `/docs/`。
 - `docs/ui/`：放 UI 原型、设计说明、交互规则。
 - `docs/tech/`：放服务端、小程序、Android/iOS、数据库、接口等技术方案。
 - `docs/plans/`：放正式开发拆解计划。
 - `packages/api-contract/`：放 OpenAPI 契约，供服务端、微信小程序、Flutter 共用；当前覆盖首页汇总、服药记录、INR raw/corrected/trend/tier 与设置项。
 - `server/`：Go/Gin 服务端。
-- `miniapp/`：微信小程序 TypeScript 工程。
-- `app_flutter/`：Android/iOS Flutter 工程。
+- `wxapp/`：微信小程序 TypeScript 工程。
+- `flutter/`：Android/iOS Flutter 工程。
 
 ## 正式开发执行方式
 
@@ -38,7 +40,9 @@
 npm run build
 npm run test:product
 npm run test:md-preview
-cd miniapp && npm test
+npm run test:routes
+cd wxapp && npm test
+cd ../flutter && flutter analyze && flutter test
 ```
 
 服务端测试建议使用临时可写 Go 缓存，和 CI 保持一致：
@@ -48,20 +52,23 @@ cd server
 GOCACHE=/tmp/warfarin-go-build-cache GOMODCACHE=/tmp/warfarin-go-mod-cache go test ./...
 ```
 
-GitHub Actions 会运行服务端 Go 测试、微信小程序 TypeScript 校验，以及存在时的产品/Markdown 预览测试。
+GitHub Actions 会运行服务端 Go 测试、微信小程序 TypeScript 校验、Flutter analyze/test，以及产品/Markdown/路由预览测试。
 
-当前环境提示：Go、Node、Codex 可用；Flutter SDK 暂未安装，Flutter 阶段会先生成源码骨架与文档，安装 SDK 后补跑 `flutter test`。
+当前环境提示：Go、Node、Codex、Flutter SDK 均已可用；Flutter SDK 位于本机工具目录，验证命令为 `cd flutter && flutter analyze && flutter test`。
 
 ## 本地预览
 
 ```bash
-python3 -m http.server 8000
+npm run build
+python3 -m http.server 8000 -d dist
 ```
 
 然后打开：
 
 ```text
-http://localhost:8000
+http://localhost:8000/
+http://localhost:8000/ui/
+http://localhost:8000/docs/
 ```
 
 ## 部署到 Cloudflare Workers Static Assets

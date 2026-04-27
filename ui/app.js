@@ -99,20 +99,25 @@ const copy = serverPayload.homeSummary.displayText;
 const inrCopy = serverPayload.inrRecordsResponse.displayText;
 const settingsCopy = serverPayload.settings.displayText;
 
-function pathParts() { return location.pathname.split('/').filter(Boolean); }
+function pathParts() {
+  const parts = location.pathname.split('/').filter(Boolean);
+  return parts[0] === 'ui' ? parts.slice(1) : parts;
+}
+function routePrefix() { return location.pathname.split('/').filter(Boolean)[0] === 'ui' ? '/ui' : ''; }
+function routeHref(platform, page) { return `${routePrefix()}/${platform}/${page}/`; }
 function platformOf(parts) { return platforms[parts[0]] ? parts[0] : 'wechat'; }
 function pageOf(parts) { return parts[1] || 'home'; }
 function isSubpage(page) { return !['home', 'records', 'inr', 'me'].includes(page); }
 function nav(platform, page) {
-  return `<nav class="tabbar">${tabs.map(([id, label, icon]) => `<a class="${page === id ? 'on' : ''}" href="/${platform}/${id}/"><span>${icon}</span><span>${label}</span></a>`).join('')}</nav>`;
+  return `<nav class="tabbar">${tabs.map(([id, label, icon]) => `<a class="${page === id ? 'on' : ''}" href="${routeHref(platform, id)}"><span>${icon}</span><span>${label}</span></a>`).join('')}</nav>`;
 }
 function renderTopBar(platform, title) {
   if (platform === 'ios') return `<div class="statusbar">9:41<span>Wi‑Fi 🔋</span></div><section class="ios-title noAction"><small>抗凝小助手</small><h1>${title}</h1></section>`;
-  return `<div class="statusbar">9:41<span>${platform === 'wechat' ? '微信' : '5G'} ▰</span></div><div class="nav noAction"><button onclick="location.href='/'">‹</button><h2>${title}</h2><i></i></div>`;
+  return `<div class="statusbar">9:41<span>${platform === 'wechat' ? '微信' : '5G'} ▰</span></div><div class="nav noAction"><button onclick="location.href=routePrefix() || '/'">‹</button><h2>${title}</h2><i></i></div>`;
 }
 function shell(platform, page, body) {
   const active = isSubpage(page) ? 'me' : page;
-  return `<a class="backlink" href="/">← 总览</a><main class="app-shell"><section class="device ${platforms[platform].cls}"><div class="screen">${renderTopBar(platform, routeMap[page] || '抗凝助手')}<div class="content">${body}</div>${nav(platform, active)}</div></section></main>`;
+  return `<a class="backlink" href="${routePrefix() || '/'}">← 总览</a><main class="app-shell"><section class="device ${platforms[platform].cls}"><div class="screen">${renderTopBar(platform, routeMap[page] || '抗凝助手')}<div class="content">${body}</div>${nav(platform, active)}</div></section></main>`;
 }
 
 function statusKind(value) {
@@ -158,7 +163,7 @@ function inr(platform) {
   return shell(platform, 'inr', `${alertBox('danger')}<section class="card"><div class="sectionTitle"><div><h3>${inrCopy.trend.title}</h3><small>${inrCopy.trend.subtitle}</small></div>${addInrButton(platform)}</div>${trendCard(true, false)}</section><section class="card"><div class="sectionTitle"><h3>${inrCopy.recordsTitle}</h3><small>${inrCopy.recordsHint}</small></div><div class="list">${inrRecords.map(r => `<article class="record inrRecord"><div class="recordHead"><div><span class="recordDate">${r.date}</span><strong class="inrRecordValue">INR ${r.correctedValue.toFixed(1)}</strong></div><span class="status ${r.s}">${r.displayText.statusLabel}</span></div><p>${r.displayText.note}</p><small>${r.displayText.rawLabel} ${r.rawValue.toFixed(1)} · ${r.displayText.methodLabel}</small></article>`).join('')}</div></section>${inrDialog(platform)}`);
 }
 function me(platform) {
-  return shell(platform, 'me', `<section class="profile card"><div class="avatar">饼</div><div><h3>小饼</h3><p>目标 INR 1.8–2.5 · 华法林长期管理</p></div></section><section class="card"><div class="subpageLinks"><a href="/${platform}/inr-settings/">INR 设置 ›<small>检测方式、目标范围、偏移量、检测周期</small></a><a href="/${platform}/dose-settings/">服药设置 ›<small>药品、循环剂量、完成后规则</small></a><a href="/${platform}/notifications/">通知设置 ›<small>服药提醒、INR 检测提醒</small></a><a href="/${platform}/account/">账号绑定 ›<small>微信/手机号/Google/Apple</small></a><a href="/${platform}/profile/">个人资料 ›<small>年龄、性别、疾病类型</small></a><a href="/${platform}/help/">使用帮助 ›<small>新用户初始设置</small></a></div></section><section class="card"><div class="notice info"><strong>医疗边界</strong><span>本工具只做记录和提醒，剂量调整与异常 INR 处理请遵医嘱。</span></div></section>`);
+  return shell(platform, 'me', `<section class="profile card"><div class="avatar">饼</div><div><h3>小饼</h3><p>目标 INR 1.8–2.5 · 华法林长期管理</p></div></section><section class="card"><div class="subpageLinks"><a href="${routeHref(platform, 'inr-settings')}">INR 设置 ›<small>检测方式、目标范围、偏移量、检测周期</small></a><a href="${routeHref(platform, 'dose-settings')}">服药设置 ›<small>药品、循环剂量、完成后规则</small></a><a href="${routeHref(platform, 'notifications')}">通知设置 ›<small>服药提醒、INR 检测提醒</small></a><a href="${routeHref(platform, 'account')}">账号绑定 ›<small>微信/手机号/Google/Apple</small></a><a href="${routeHref(platform, 'profile')}">个人资料 ›<small>年龄、性别、疾病类型</small></a><a href="${routeHref(platform, 'help')}">使用帮助 ›<small>新用户初始设置</small></a></div></section><section class="card"><div class="notice info"><strong>医疗边界</strong><span>本工具只做记录和提醒，剂量调整与异常 INR 处理请遵医嘱。</span></div></section>`);
 }
 function inrSettings(platform) {
   const c = settingsCopy;
@@ -223,7 +228,7 @@ function closeModal(event, id) {
   if (event.target && event.target.id === id) openModal(id, false);
 }
 function showDoseDialog() { openModal('doseDoneSheet', true); }
-function showInrDialog(platform) { location.href = `/${platform}/inr/`; }
+function showInrDialog(platform) { location.href = routeHref(platform, 'inr'); }
 
 function landing() {
   const routes = ['home', 'records', 'inr', 'me', 'login', 'inr-settings', 'inr-methods', 'test-settings', 'dose-settings', 'after-dose-rule', 'notifications', 'account', 'profile', 'help'];
@@ -242,9 +247,9 @@ function landing() {
       desc: '三端页面、首页状态卡片、强提醒、INR 趋势和设置交互说明。',
       links: [
         ['UI 设计说明', '/docs/ui/README/'],
-        ['微信首页原型', '/wechat/home/'],
-        ['Android INR 原型', '/android/inr/'],
-        ['iOS 设置原型', '/ios/me/']
+        ['微信首页原型', '/ui/wechat/home/'],
+        ['Android INR 原型', '/ui/android/inr/'],
+        ['iOS 设置原型', '/ui/ios/me/']
       ]
     },
     {
@@ -264,12 +269,13 @@ function landing() {
         ['2026-04-25 INR 产品完善与契约对齐报告', '/docs/reports/2026-04-25-inr-refinement-implementation/'],
         ['2026-04-25 服务端文案契约与多语言准备报告', '/docs/reports/2026-04-25-server-copy-contract/'],
         ['2026-04-27 项目边界与独立运行报告', '/docs/reports/2026-04-27-project-boundary-independent-run/'],
-        ['2026-04-27 Flutter SDK 安装与端侧验证报告', '/docs/reports/2026-04-27-flutter-sdk-verification/']
+        ['2026-04-27 Flutter SDK 安装与端侧验证报告', '/docs/reports/2026-04-27-flutter-sdk-verification/'],
+        ['2026-04-27 ui/docs 入口与目录整理报告', '/docs/reports/2026-04-27-project-structure-ui-docs-landing/']
       ]
     }
   ];
   const highlights = ['首页：最近 INR、下次检测、超明显提醒', '服药：完成后选择明日剂量，不做补服', 'INR：校正值主显示，原始值弱展示，双曲线趋势', '设置：检测方式、校正偏移、按天/周/月周期'];
-  return `<main class="landing docPortal"><section class="hero"><div><p class="eyebrow">Warfarin INR Tracker · Documentation Portal</p><h1>抗凝小助手文档入口</h1><p class="lead">集中查看需求、UI、技术方案、架构、数据库缓存设计和当前进度；所有 Markdown 文档已支持 Cloudflare 在线美化预览。</p><div class="heroBullets">${highlights.map(item => `<span>${item}</span>`).join('')}</div></div><span class="chip">目标 INR 1.8–2.5</span></section><section class="docGroupGrid">${docGroups.map(group => `<article class="docGroup"><div><p class="eyebrow">Document</p><h2>${group.title}</h2><p>${group.desc}</p></div><div class="docGroupLinks">${group.links.map(([label, href]) => `<a href="${href}">${label}<span>›</span></a>`).join('')}</div></article>`).join('')}</section><section class="platform-grid">${Object.entries(platforms).map(([k, p]) => `<article class="platform-card"><h2>${p.label}</h2><p>${k === 'wechat' ? '微信快捷登录，适合日常快速记录。' : '适合手机端长期记录和提醒。'}</p><div class="route-links">${routes.map(id => `<a href="/${k}/${id}/">${routeMap[id]}<span>›</span></a>`).join('')}</div></article>`).join('')}</section></main>`;
+  return `<main class="landing docPortal"><section class="hero"><div><p class="eyebrow">Warfarin INR Tracker · UI Portal</p><h1>抗凝小助手 UI 原型入口</h1><p class="lead">集中查看微信小程序、Android、iOS 三端页面原型；根入口保留 UI 与 Docs 的统一导航，旧平台路径继续兼容。</p><div class="heroBullets">${highlights.map(item => `<span>${item}</span>`).join('')}</div></div><span class="chip">目标 INR 1.8–2.5</span></section><section class="docGroupGrid">${docGroups.map(group => `<article class="docGroup"><div><p class="eyebrow">Document</p><h2>${group.title}</h2><p>${group.desc}</p></div><div class="docGroupLinks">${group.links.map(([label, href]) => `<a href="${href}">${label}<span>›</span></a>`).join('')}</div></article>`).join('')}</section><section class="platform-grid">${Object.entries(platforms).map(([k, p]) => `<article class="platform-card"><h2>${p.label}</h2><p>${k === 'wechat' ? '微信快捷登录，适合日常快速记录。' : '适合手机端长期记录和提醒。'}</p><div class="route-links">${routes.map(id => `<a href="/ui/${k}/${id}/">${routeMap[id]}<span>›</span></a>`).join('')}</div></article>`).join('')}</section></main>`;
 }
 function render() {
   const doRender = () => {

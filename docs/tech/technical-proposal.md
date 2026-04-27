@@ -69,14 +69,14 @@ inr_helper/
 │   │   └── pkg/
 │   ├── migrations/
 │   └── tests/
-├── app_flutter/                    # Flutter Android/iOS
+├── flutter/                        # Flutter Android/iOS
 │   ├── lib/
 │   │   ├── app/
 │   │   ├── core/
 │   │   ├── features/
 │   │   └── shared/
 │   └── test/
-├── miniapp/                        # 微信小程序 TypeScript
+├── wxapp/                          # 微信小程序 TypeScript
 │   ├── miniprogram/
 │   ├── typings/
 │   └── tests/

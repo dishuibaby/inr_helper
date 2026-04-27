@@ -2,7 +2,7 @@
 
 ## 1. 现有问题
 
-上一轮验证中，`app_flutter` 无法执行 Flutter 测试，根因是当前机器缺少可调用的 Flutter CLI：
+上一轮验证中，`flutter` 无法执行 Flutter 测试，根因是当前机器缺少可调用的 Flutter CLI：
 
 ```text
 flutter: command not found
@@ -28,7 +28,7 @@ flutter: command not found
 - CLI 链接：`/home/pi/.local/bin/flutter`
 - 安装方式：用户目录安装，不写入项目仓库，不记录任何凭据。
 
-> 说明：`flutter doctor` 仍可能提示 Android SDK、Chrome 或 Linux 桌面构建依赖缺失；这不影响本轮 `app_flutter` 的 Dart/Flutter 单元测试与静态分析。后续如要真机构建 Android/iOS，再按目标平台补齐原生工具链。
+> 说明：`flutter doctor` 仍可能提示 Android SDK、Chrome 或 Linux 桌面构建依赖缺失；这不影响本轮 `flutter` 的 Dart/Flutter 单元测试与静态分析。后续如要真机构建 Android/iOS，再按目标平台补齐原生工具链。
 
 ## 4. 代码修复
 
@@ -36,18 +36,18 @@ flutter: command not found
 
 | 文件 | 问题 | 处理 |
 |---|---|---|
-| `app_flutter/lib/core/theme/app_theme.dart` | 新版 Flutter `ThemeData.cardTheme` 期望 `CardThemeData?` | 将 `CardTheme` 调整为 `CardThemeData` |
-| `app_flutter/lib/features/home/widgets/reminder_banner.dart` | `Color.withOpacity` 已废弃 | 改为 `withValues(alpha: 0.10)` |
-| `app_flutter/lib/features/inr/inr_page.dart` | `DropdownButtonFormField.value` 已废弃 | 改为 `initialValue` |
+| `flutter/lib/core/theme/app_theme.dart` | 新版 Flutter `ThemeData.cardTheme` 期望 `CardThemeData?` | 将 `CardTheme` 调整为 `CardThemeData` |
+| `flutter/lib/features/home/widgets/reminder_banner.dart` | `Color.withOpacity` 已废弃 | 改为 `withValues(alpha: 0.10)` |
+| `flutter/lib/features/inr/inr_page.dart` | `DropdownButtonFormField.value` 已废弃 | 改为 `initialValue` |
 
-此外，首次执行 `flutter pub get` 生成 `app_flutter/pubspec.lock`，用于锁定当前 Flutter 端依赖版本，提升后续验证可复现性。
+此外，首次执行 `flutter pub get` 生成 `flutter/pubspec.lock`，用于锁定当前 Flutter 端依赖版本，提升后续验证可复现性。
 
 ## 5. 验证结果
 
 已完成以下 Flutter 验证：
 
 ```sh
-cd app_flutter
+cd flutter
 flutter analyze
 flutter test
 ```
@@ -73,7 +73,7 @@ flutter test
 
 ## 7. 后续建议
 
-1. 后续 CI 可增加 Flutter SDK 缓存与 `cd app_flutter && flutter analyze && flutter test`。
+1. 后续 CI 可增加 Flutter SDK 缓存与 `cd flutter && flutter analyze && flutter test`。
 2. Android 真机构建前补 Android SDK、命令行工具和签名配置。
 3. iOS 构建仍需 macOS/Xcode 环境，不应在当前 Linux/ARM64 机器上承诺本地完成。
 4. 如后续需要桌面预览，再补齐 Chrome/Linux desktop 依赖。

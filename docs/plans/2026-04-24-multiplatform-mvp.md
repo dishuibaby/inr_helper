@@ -28,7 +28,7 @@
 
 ### Module A: Flutter Android/iOS 客户端
 - Branch/worktree: `feat/flutter-mvp` / `/tmp/inr_helper-flutter`
-- Scope: `app_flutter/`，包含 Clean Architecture 风格目录、API client、domain models、Riverpod 状态层、首页/服药/INR/设置页面骨架与 widget/unit tests。
+- Scope: `flutter/`，包含 Clean Architecture 风格目录、API client、domain models、Riverpod 状态层、首页/服药/INR/设置页面骨架与 widget/unit tests。
 - Verification: `flutter test`/`flutter analyze`（SDK 可用时）；无 SDK 时执行源码结构检查并记录限制。
 
 ### Module B: 服务端 SQLite 持久化与迁移入口
@@ -44,7 +44,7 @@
 ### Module D: 小程序体验补齐与联调准备
 - Branch/worktree: `feat/miniapp-integration-polish` / `/tmp/inr_helper-miniapp`
 - Scope: 小程序端错误态、加载态、API base 配置、首页强提醒/INR 双曲线/设置/明日剂量交互补齐，保留低耦合 request 层。
-- Verification: `cd miniapp && npm test`。
+- Verification: `cd wxapp && npm test`。
 
 ### Integration Module: 合并、联调、审查、GitHub 交付
 - Branch: `main` 或集成分支。
@@ -105,18 +105,18 @@
 
 ## Task 3: 微信小程序 TypeScript MVP 骨架
 
-**Objective:** 创建 `miniapp/` 原生小程序 TS 结构，按当前 UI 方案实现核心页面骨架与 API 请求层。
+**Objective:** 创建 `wxapp/` 原生小程序 TS 结构，按当前 UI 方案实现核心页面骨架与 API 请求层。
 
 **Files:**
-- Create: `miniapp/project.config.json`
-- Create: `miniapp/miniprogram/app.json`
-- Create: `miniapp/miniprogram/app.ts`
-- Create: `miniapp/miniprogram/utils/request.ts`
-- Create: `miniapp/miniprogram/types/api.ts`
-- Create: `miniapp/miniprogram/pages/home/*`
-- Create: `miniapp/miniprogram/pages/medication/*`
-- Create: `miniapp/miniprogram/pages/inr/*`
-- Create: `miniapp/miniprogram/pages/settings/*`
+- Create: `wxapp/project.config.json`
+- Create: `wxapp/miniprogram/app.json`
+- Create: `wxapp/miniprogram/app.ts`
+- Create: `wxapp/miniprogram/utils/request.ts`
+- Create: `wxapp/miniprogram/types/api.ts`
+- Create: `wxapp/miniprogram/pages/home/*`
+- Create: `wxapp/miniprogram/pages/medication/*`
+- Create: `wxapp/miniprogram/pages/inr/*`
+- Create: `wxapp/miniprogram/pages/settings/*`
 
 **Acceptance:**
 - 首页显示最近 INR、下次检测、强提醒。
@@ -125,8 +125,8 @@
 - 设置页检测方式、偏移量、检测周期。
 
 **Verification:**
-- `cd miniapp && npm test` 或最小 TypeScript 校验。
-- 提交：`feat(miniapp): add TypeScript mini program MVP skeleton`。
+- `cd wxapp && npm test` 或最小 TypeScript 校验。
+- 提交：`feat(wxapp): add TypeScript mini program MVP skeleton`。
 
 ---
 
@@ -149,7 +149,7 @@
 
 **Verification:**
 - `cd server && go test ./...`
-- `cd miniapp && npm test`
+- `cd wxapp && npm test`
 - 提交：`chore(server): document database engine strategy`。
 
 ## Task 3.6: 服务端 SQLite 持久化与迁移入口
@@ -179,17 +179,17 @@
 
 ## Task 4: Flutter Android/iOS MVP 骨架
 
-**Objective:** 创建 `app_flutter/` Flutter 跨端结构，复用 API contract 和当前 UI 信息架构。
+**Objective:** 创建 `flutter/` Flutter 跨端结构，复用 API contract 和当前 UI 信息架构。
 
 **Files:**
-- Create: `app_flutter/pubspec.yaml`
-- Create: `app_flutter/lib/main.dart`
-- Create: `app_flutter/lib/core/api/api_client.dart`
-- Create: `app_flutter/lib/features/home/*`
-- Create: `app_flutter/lib/features/medication/*`
-- Create: `app_flutter/lib/features/inr/*`
-- Create: `app_flutter/lib/features/settings/*`
-- Create: `app_flutter/test/*`
+- Create: `flutter/pubspec.yaml`
+- Create: `flutter/lib/main.dart`
+- Create: `flutter/lib/core/api/api_client.dart`
+- Create: `flutter/lib/features/home/*`
+- Create: `flutter/lib/features/medication/*`
+- Create: `flutter/lib/features/inr/*`
+- Create: `flutter/lib/features/settings/*`
+- Create: `flutter/test/*`
 
 **Acceptance:**
 - Android/iOS 共用页面：首页、记录/服药、INR、我的/设置。
@@ -197,7 +197,7 @@
 - 首页强提醒与服药完成后明日剂量选择。
 
 **Verification:**
-- 当前环境若无 Flutter SDK：提交源码骨架与 `app_flutter/README.md` 标注待 SDK 验证。
+- 当前环境若无 Flutter SDK：提交源码骨架与 `flutter/README.md` 标注待 SDK 验证。
 - SDK 可用后运行 `flutter test`。
 - 提交：`feat(app): add Flutter MVP skeleton`。
 

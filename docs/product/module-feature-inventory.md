@@ -111,9 +111,9 @@
 | 节点 | 功能 | 实现方式/方案 | 使用理由 |
 |---|---|---|---|
 | 主页文档入口 | 按需求、UI、技术方案、架构、数据库、进度分类 | `landing()` 输出文档卡片 | 用户可在 CF 直接查阅，不需要翻仓库 |
-| Markdown 美化 | `.md` 路径自动渲染为 HTML | `worker.js` 将 `.md` rewrite 到预览路由；`markdown.js` 客户端渲染 | 保留 Markdown 源文件，同时提供可读页面 |
+| Markdown 美化 | `.md` 路径自动渲染为 HTML | `worker.js` 将 `.md` rewrite 到预览路由；`ui/markdown.js` 客户端渲染 | 保留 Markdown 源文件，同时提供可读页面 |
 | 静态构建 | 复制原型路由与文档路由 | `build-dist.py` | Cloudflare Workers Static Assets 无服务端构建依赖 |
-| 原型入口 | 微信/Android/iOS 页面路由 | `/wechat/home/` 等 | 文档和 UI 原型可互相对照 |
+| 原型入口 | 微信/Android/iOS 页面路由 | `/ui/wechat/home/` 等；旧 `/wechat/home/` 等兼容保留 | 文档和 UI 原型可互相对照 |
 
 ## 6. 后续功能池
 

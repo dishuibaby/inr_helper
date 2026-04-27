@@ -2,15 +2,16 @@
 
 本目录用于沉淀抗凝小助手的 UI 设计资料，与技术方案分开维护。
 
-当前仓库根目录仍保留可直接预览和部署的静态原型：
+当前仓库通过 `/` 提供统一入口，通过 `/ui/` 提供可直接预览和部署的静态原型：
 
-- 入口：`/index.html`
-- 逻辑：`/app.js`
-- 样式：`/styles.css`
+- 入口：`/ui/index.html`
+- 逻辑：`/ui/app.js`
+- 样式：`/ui/styles.css`
 - 平台路由：
-  - `/wechat/home/`、`/wechat/records/`、`/wechat/inr/`、`/wechat/me/`
-  - `/android/home/`、`/android/records/`、`/android/inr/`、`/android/me/`
-  - `/ios/home/`、`/ios/records/`、`/ios/inr/`、`/ios/me/`
+  - 规范路径：`/ui/wechat/home/`、`/ui/wechat/records/`、`/ui/wechat/inr/`、`/ui/wechat/me/`
+  - 规范路径：`/ui/android/home/`、`/ui/android/records/`、`/ui/android/inr/`、`/ui/android/me/`
+  - 规范路径：`/ui/ios/home/`、`/ui/ios/records/`、`/ui/ios/inr/`、`/ui/ios/me/`
+  - 兼容路径：`/wechat/...`、`/android/...`、`/ios/...` 暂时保留，避免破坏旧线上链接。
 
 ## UI 当前范围
 
